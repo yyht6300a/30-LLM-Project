@@ -1,0 +1,22 @@
+# Reference paper repository (cloned separately, keep upstream git history)
+reference/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Node
+node_modules/
+
+# Model artifacts (large weights should not be committed)
+models/
+*.safetensors
+*.gguf
+*.bin
+
+# Generated outputs
+*.log
