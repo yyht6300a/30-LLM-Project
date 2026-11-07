@@ -1,0 +1,48 @@
+{
+  "model": "qwen2.5-32b",
+  "dataset": "songs",
+  "features": [
+    "confidence",
+    "qpop",
+    "gene_pop",
+    "gene_coo"
+  ],
+  "protocol": "balanced",
+  "mlp": {
+    "hidden": [
+      128,
+      64,
+      32
+    ],
+    "lr": 0.0005,
+    "weight_decay": 0.0001,
+    "dropout": 0.3,
+    "seed": 42
+  },
+  "scaler_mean": [
+    0.8834597646913342,
+    13.987603305785123,
+    74.85950413223141,
+    32.3801652892562
+  ],
+  "scaler_scale": [
+    0.12337812632088108,
+    7.919262740623677,
+    48.23809848251338,
+    41.71623070346735
+  ],
+  "threshold": 0.4385187327861786,
+  "n_trainval": 242,
+  "n_test": 242,
+  "files": {
+    "pt": "qwen2.5-32b__songs.pt",
+    "npz": "qwen2.5-32b__songs.npz"
+  },
+  "test_metrics": {
+    "alignment": 0.9049586776859504,
+    "auroc": 0.9644833003210163,
+    "ece": 0.04306189201325796,
+    "brier": 0.06948227569764424,
+    "conf_wrong": 0.1362690216176643
+  }
+}
