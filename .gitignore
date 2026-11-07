@@ -18,8 +18,5 @@ models/
 *.gguf
 *.bin
 
-# P2 calibrator weights (regenerated with `python -m calibrator.training`)
-calibrator/training/artifacts/
-
 # Generated outputs
 *.log

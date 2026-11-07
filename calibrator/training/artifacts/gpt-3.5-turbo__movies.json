@@ -1,0 +1,48 @@
+{
+  "model": "gpt-3.5-turbo",
+  "dataset": "movies",
+  "features": [
+    "confidence",
+    "qpop",
+    "gene_pop",
+    "gene_coo"
+  ],
+  "protocol": "balanced",
+  "mlp": {
+    "hidden": [
+      128,
+      64,
+      32
+    ],
+    "lr": 0.0005,
+    "weight_decay": 0.0001,
+    "dropout": 0.3,
+    "seed": 42
+  },
+  "scaler_mean": [
+    0.9381222779656365,
+    23.51086956521739,
+    28.157004830917874,
+    9.670289855072463
+  ],
+  "scaler_scale": [
+    0.11424831261453494,
+    10.638941672938381,
+    32.65600960021966,
+    15.450989568954702
+  ],
+  "threshold": 0.4312099814414978,
+  "n_trainval": 828,
+  "n_test": 828,
+  "files": {
+    "pt": "gpt-3.5-turbo__movies.pt",
+    "npz": "gpt-3.5-turbo__movies.npz"
+  },
+  "test_metrics": {
+    "alignment": 0.8152173913043478,
+    "auroc": 0.8882120936311232,
+    "ece": 0.04109733407739957,
+    "brier": 0.13031899536449668,
+    "conf_wrong": 0.2907776844722628
+  }
+}

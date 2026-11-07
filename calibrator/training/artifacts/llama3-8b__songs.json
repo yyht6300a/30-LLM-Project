@@ -1,0 +1,48 @@
+{
+  "model": "llama3-8b",
+  "dataset": "songs",
+  "features": [
+    "confidence",
+    "qpop",
+    "gene_pop",
+    "gene_coo"
+  ],
+  "protocol": "balanced",
+  "mlp": {
+    "hidden": [
+      128,
+      64,
+      32
+    ],
+    "lr": 0.0005,
+    "weight_decay": 0.0001,
+    "dropout": 0.3,
+    "seed": 42
+  },
+  "scaler_mean": [
+    0.7848312001562032,
+    10.978193146417446,
+    55.82866043613707,
+    18.294392523364486
+  ],
+  "scaler_scale": [
+    0.18445879277985963,
+    6.430759259065201,
+    45.55300826242945,
+    29.313573770277287
+  ],
+  "threshold": 0.4723570644855499,
+  "n_trainval": 642,
+  "n_test": 642,
+  "files": {
+    "pt": "llama3-8b__songs.pt",
+    "npz": "llama3-8b__songs.npz"
+  },
+  "test_metrics": {
+    "alignment": 0.8504672897196262,
+    "auroc": 0.9227950855638438,
+    "ece": 0.04404637879964742,
+    "brier": 0.10458064905458574,
+    "conf_wrong": 0.179184959401095
+  }
+}

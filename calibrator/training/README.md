@@ -48,4 +48,5 @@ P3 推理流程：按 `features` 顺序取 `[confidence, qpop, gene_pop, gene_co
 再与 `threshold` 比较得出 answer/retrieve 决策。未命中流行度表的实体按 0 填（与
 训练一致）。
 
-`artifacts/` 已加入 `.gitignore`，二进制权重不进仓库；一行命令即可重新生成。
+权重（`.pt` / `.npz` / `.json`）已提交到仓库；如需更新，运行
+`python -m calibrator.training` 重新生成即可。
