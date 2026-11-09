@@ -92,8 +92,10 @@ reference/Popular-but-Wrong/res/
 
 ### 2.3 requirement.txt
 
+```bash
 虚拟环境venv1: model_runtime/vllm/requirements.txt
 虚拟环境venv-m3: mcp_server/requirements.txt
+```
 
 ## 3. 启动 vLLM
 
