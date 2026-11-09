@@ -2,112 +2,102 @@
 
 所有者：P3。
 
-# Qwen2.5-7B vLLM 运行时与 M3/M4 接入说明
+# M3：vLLM 与置信度校准 MCP 服务
 
-本文档说明如何在学校 GPU 集群上启动 Qwen2.5-7B-Instruct、获取逐 token logprobs，并将生成结果交给 M3 MCP 校准服务。
+本文说明 M3 模块的安装、启动、调用和验收方式。
 
-
----
-
-## 1. 系统数据流
-
-完整流程如下：
+系统流程：
 
 ```text
-用户问题
-  ↓
-OpenHands 调用 vLLM 生成短答案
-  ↓
-vLLM 返回 answer 和逐 token logprobs
-  ↓
-M4 计算原始置信度 c
-  ↓
-M4 调用 MCP calibrate 工具
-  ↓
-M3 查询 PopQ、PopGe、RPopGe
-  ↓
-加载对应 (model, domain) 的 MLP 权重
-  ↓
-返回 calibrated_probability 和 decision
-  ↓
-OpenHands 执行 answer / retrieve
+问题 -> vLLM 生成答案和 token logprobs
+     -> 计算原始置信度 c
+     -> MCP calibrate 工具
+     -> 查询流行度特征并运行 MLP
+     -> 返回校准概率和 answer/retrieve/unknown 决策
 ```
 
-M3 提供两个能力：
+## 1. 环境要求
 
-1. OpenAI-compatible vLLM API：
+已验证的集群环境：
 
-```text
-http://127.0.0.1:8000/v1
-```
+- Slurm 分区：`MGPU-TC2`
+- GPU：NVIDIA A40 46 GB
+- CUDA：12.8
+- Python：3.12
+- 模型：`Qwen/Qwen2.5-7B-Instruct`
+- vLLM 模型名：`qwen2.5-7b`
 
-2. stdio MCP Server：
+项目使用两个独立虚拟环境：
+
+| 环境 | 用途 | 是否需要 GPU |
+|---|---|---:|
+| `.venv1` | vLLM、PyTorch、模型推理 | 是 |
+| `.venv-m3` | MCP Server、NumPy 推理和测试 | 否 |
+
+分开环境可避免 vLLM 的 PyTorch/CUDA 依赖影响轻量的 MCP 服务。执行命令前，请先确认激活了正确环境。
+
+## 2. 首次安装
+
+以下命令只需执行一次。建议在登录节点创建环境，在计算节点启动 vLLM。
+
+### 2.1 创建 vLLM 环境
 
 ```bash
-python -m mcp_server.server
+module load python312
+module load cuda/12.8.0
+
+cd /absolute/path/to/30-LLM-Project
+python3 -m venv .venv1
+source .venv1/bin/activate
+
+python -m pip install --upgrade pip
+python -m pip install vllm openai
 ```
 
----
+检查安装：
 
-## 2. 已验证运行环境
+```bash
+python --version
+python -c "import torch, vllm; print(torch.__version__, vllm.__version__, torch.cuda.is_available())"
+```
 
-当前配置已在学校 GPU 集群验证：
+在 GPU 计算节点上，最后一项应为 `True`。
 
-| 项目 | 配置 |
-|---|---|
-| 调度系统 | Slurm |
-| GPU 分区 | `MGPU-TC2` |
-| GPU | NVIDIA A40 46GB |
-| GPU 数量 | 1 |
-| CUDA | 12.8 |
-| 模型 | `Qwen/Qwen2.5-7B-Instruct` |
-| 对外模型名 | `qwen2.5-7b` |
-| 推理精度 | BF16 |
-| vLLM 环境 | `.venv-vllm` |
-| MCP 环境 | `.venv-m3` |
+### 2.2 创建 MCP 环境
 
-Qwen2.5-7B 可以在单张 A40 上运行，不需要 tensor parallel，也不应默认使用量化模型。
+```bash
+module load python312
 
-量化会改变 token 概率分布，可能导致 P2 训练出的校准器失效。
+cd /absolute/path/to/30-LLM-Project
+python3 -m venv .venv-m3
+source .venv-m3/bin/activate
 
----
+python -m pip install --upgrade pip
+python -m pip install "mcp[cli]>=2,<3" anyio numpy openai pydantic pytest
+```
 
-## 3. 目录与文件
+检查安装并运行 CPU 测试：
 
-M3 相关文件：
+```bash
+python -c "import anyio, mcp, numpy, openai, pydantic"
+pytest -q mcp_server/tests
+```
+
+MCP 还依赖论文仓库中的离线数据：
 
 ```text
-model_runtime/vllm/
-├── start_qwen25_7b.sh       # 启动 vLLM
-├── smoke_test.py            # vLLM 与 logprobs 测试
-├── m3_e2e.slurm             # Slurm 一键端到端验收
-└── README.md
-
-mcp_server/
-├── artifact_store.py        # 加载 P2 metadata、scaler 和 NPZ 权重
-├── service.py               # 特征查询与校准业务逻辑
-├── server.py                # MCP calibrate 工具
-├── e2e_smoke_test.py        # vLLM → MCP 真实闭环测试
-└── tests/
+reference/Popular-but-Wrong/data/
+reference/Popular-but-Wrong/res/
 ```
 
-模型权重位于：
+### 2.3 requirement.txt
 
-```text
-calibrator/training/artifacts/
-```
+虚拟环境venv1: model_runtime/vllm/requirements.txt
+虚拟环境venv-m3: mcp_server/requirements.txt
 
-P1 离线特征资源位于：
+## 3. 启动 vLLM
 
-```text
-reference/Popular-but-Wrong/
-```
-
----
-
-## 4. 启动 vLLM
-
-### 4.1 申请交互式 GPU
+### 3.1 申请 GPU
 
 ```bash
 srun \
@@ -119,454 +109,247 @@ srun \
   --pty bash -l
 ```
 
-进入计算节点后：
+### 3.2 在计算节点启动服务
 
 ```bash
 module load python312
 module load cuda/12.8.0
 
-nvidia-smi
-```
+cd /absolute/path/to/30-LLM-Project
+source .venv-vllm/bin/activate
 
-### 4.2 配置 Hugging Face 缓存
-
-必须将缓存放在学校允许的 project 或 scratch 路径中：
-
-```bash
-export M3_HF_HOME="<project-or-scratch>/zhiao001/huggingface"
+export M3_HF_HOME="/absolute/project-or-scratch/path/huggingface"
 mkdir -p "$M3_HF_HOME"
-```
-
-不要把模型缓存提交到 Git。
-
-### 4.3 启动服务
-
-```bash
-cd /path/to/30-LLM-Project
-source .venv1/bin/activate
 
 model_runtime/vllm/start_qwen25_7b.sh
 ```
 
-默认配置：
-
-| 参数 | 默认值 |
-|---|---|
-| 模型 | `Qwen/Qwen2.5-7B-Instruct` |
-| served model name | `qwen2.5-7b` |
-| host | `127.0.0.1` |
-| port | `8000` |
-| dtype | `bfloat16` |
-| max model length | `4096` |
-| GPU memory utilization | `0.85` |
-| seed | `42` |
-
-检查服务：
+默认地址为 `http://127.0.0.1:8000`。健康检查：
 
 ```bash
 curl --fail http://127.0.0.1:8000/v1/models
 ```
 
----
+服务只监听 `127.0.0.1`，调用程序应与 vLLM 位于同一计算节点。
 
-## 5. M4 调用 vLLM 的固定协议
-
-M4 必须显式设置以下参数：
-
-```python
-response = client.chat.completions.create(
-    model="qwen2.5-7b",
-    messages=[
-        {
-            "role": "system",
-            "content": (
-                "Answer with only the requested entity name. "
-                "Do not explain your answer."
-            ),
-        },
-        {
-            "role": "user",
-            "content": canonical_question,
-        },
-    ],
-    temperature=0,
-    top_p=1,
-    max_tokens=32,
-    logprobs=True,
-)
-```
-
-关键要求：
-
-- `model` 必须是 `qwen2.5-7b`。
-- 必须设置 `logprobs=True`。
-- 必须使用贪心解码：`temperature=0`。
-- 问题放在 user message 中。
-- answer-only 指令放在 system message 中。
-- 不要给 canonical question 添加额外前缀、后缀或问号。
-- 不允许输出解释、推理过程或多段文本。
-
-### 为什么不能修改 canonical question
-
-P1 的 `PopularityLookup` 使用论文问题模板识别领域和实体，例如：
+可通过以下变量覆盖默认配置：
 
 ```text
-Who is the director of the movie The Intouchables
+M3_MODEL_ID
+M3_SERVED_MODEL_NAME
+M3_VLLM_HOST
+M3_VLLM_PORT
+M3_MAX_MODEL_LEN
+M3_GPU_MEMORY_UTILIZATION
 ```
 
-如果改成：
+## 4. 启动 MCP Server
 
-```text
-Please answer: Who is the director of the movie The Intouchables?
-```
-
-可能无法正确查询 `PopQ`，导致校准结果降级。
-
----
-
-## 6. 原始置信度 c 的计算
-
-论文中的原始置信度定义为：
-
-```text
-生成答案所有 token 概率的算术平均
-```
-
-公式：
-
-```python
-c = mean(exp(token_logprob))
-```
-
-参考实现：
-
-```python
-import math
-
-SPECIAL_TOKENS = {
-    "<|im_end|>",
-    "<|endoftext|>",
-}
-
-items = response.choices[0].logprobs.content
-
-answer_tokens = [
-    item
-    for item in items
-    if item.token not in SPECIAL_TOKENS
-]
-
-if not answer_tokens:
-    raise ValueError("No answer tokens with logprobs")
-
-confidence = sum(
-    math.exp(item.logprob)
-    for item in answer_tokens
-) / len(answer_tokens)
-```
-
-必须排除：
-
-```text
-<|im_end|>
-<|endoftext|>
-```
-
-不能使用以下计算方式：
-
-```python
-math.exp(mean(logprobs))       # 错误：这是几何平均
-math.prod(probabilities)       # 错误：这是序列概率
-```
-
-计算结果必须满足：
-
-```text
-0 <= confidence <= 1
-```
-
----
-
-## 7. MCP calibrate 工具
-
-MCP Server 启动命令：
+另开一个位于同一节点的终端，激活 MCP 环境：
 
 ```bash
+cd /absolute/path/to/30-LLM-Project
 source .venv-m3/bin/activate
+
+export PYTHONPATH="$PWD"
+export POPULAR_BUT_WRONG_REPO="$PWD/reference/Popular-but-Wrong"
+
 python -m mcp_server.server
 ```
 
-这是 stdio server。直接运行后没有输出并一直阻塞是正常现象，因为它在等待 MCP Host 发送请求。
+MCP Server 使用 stdio，不监听端口。启动后无输出并持续等待客户端是正常现象。日志不得写入 stdout，以免破坏 JSON-RPC 协议；应写入 stderr。
 
-不要在 MCP Server 中使用 `print()` 输出日志，因为 stdout 是协议通道。
-
-### 7.1 工具输入
-
-工具名称：
-
-```text
-calibrate
-```
-
-输入：
+MCP host 配置示例：
 
 ```json
 {
-  "question": "Who is the director of the movie The Intouchables",
-  "answer": "Olivier Nakache",
-  "confidence": 0.8954265,
-  "model": "qwen2.5-7b",
-  "domain": "movies"
+  "mcpServers": {
+    "popular-but-wrong-calibrator": {
+      "command": "/absolute/path/to/30-LLM-Project/.venv-m3/bin/python",
+      "args": ["-m", "mcp_server.server"],
+      "cwd": "/absolute/path/to/30-LLM-Project",
+      "env": {
+        "PYTHONPATH": "/absolute/path/to/30-LLM-Project",
+        "POPULAR_BUT_WRONG_REPO": "/absolute/path/to/30-LLM-Project/reference/Popular-but-Wrong"
+      }
+    }
+  }
 }
 ```
 
-字段说明：
+## 5. `calibrate` 工具
 
-| 字段 | 类型 | 说明 |
-|---|---|---|
-| `question` | string | 原始 canonical question |
-| `answer` | string | 当前 vLLM 生成的答案 |
-| `confidence` | float | 按论文公式计算的原始置信度 |
-| `model` | string | 当前必须使用 `qwen2.5-7b` |
-| `domain` | string/null | `movies`、`songs` 或 `basketball` |
+### 输入 Schema
 
-如果 `domain` 省略，服务会尝试从论文问题模板推断。
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---:|---|
+| `question` | string | 是 | 原始问题，建议保留数据集中的规范文本 |
+| `answer` | string | 是 | vLLM 生成的纯答案 |
+| `confidence` | number | 是 | 原始置信度，范围 `[0,1]` |
+| `model` | string | 是 | artifact 模型名，如 `qwen2.5-7b` |
+| `domain` | string / null | 否 | `movies`、`songs` 或 `basketball`；省略时尝试自动推断 |
 
-为了让行为更明确，M4 推荐显式传递 domain。
+原始置信度必须按答案 token 概率的算术平均计算：
 
-### 7.2 正常返回
+```python
+confidence = sum(math.exp(token.logprob) for token in answer_tokens) / len(answer_tokens)
+```
+
+计算时排除 `<|im_end|>`、`<|endoftext|>` 等特殊停止 token。不要使用序列概率，也不要使用 `exp(mean(logprob))`。
+
+### 主要输出
+
+| 字段 | 说明 |
+|---|---|
+| `status` | `ok` 或 `degraded` |
+| `raw_confidence` | vLLM 原始置信度 |
+| `calibrated_probability` | MLP 校准后的正确概率；无法校准时为 `null` |
+| `threshold` | P2 导出的决策阈值 |
+| `decision` | `answer`、`retrieve` 或 `unknown` |
+| `artifact` | 实际使用的 `<model>__<domain>` artifact |
+| `reason` | 降级原因 |
+| `warnings` | 缺特征、实体噪声等提示 |
+| `feature_values` | `confidence`、`qpop`、`gene_pop`、`gene_coo` |
+| `feature_coverage` | 三个流行度特征是否成功命中 |
+
+当校准成功时：
+
+```python
+decision = "answer" if calibrated_probability >= threshold else "retrieve"
+```
+
+### 调用示例
+
+```python
+import anyio
+from mcp import Client, StdioServerParameters
+
+
+async def main():
+    server = StdioServerParameters(
+        command="/absolute/path/to/30-LLM-Project/.venv-m3/bin/python",
+        args=["-m", "mcp_server.server"],
+        env={
+            "PYTHONPATH": "/absolute/path/to/30-LLM-Project",
+            "POPULAR_BUT_WRONG_REPO": (
+                "/absolute/path/to/30-LLM-Project/reference/Popular-but-Wrong"
+            ),
+        },
+    )
+
+    async with Client(server) as client:
+        result = await client.call_tool(
+            "calibrate",
+            arguments={
+                "question": "Who is the director of the movie The Intouchables",
+                "answer": "Olivier Nakache",
+                "confidence": 0.8954265,
+                "model": "qwen2.5-7b",
+                "domain": "movies",
+            },
+        )
+        print(result.structured_content)
+
+
+anyio.run(main)
+```
+
+返回示例：
 
 ```json
 {
   "status": "ok",
-  "model": "qwen2.5-7b",
-  "domain": "movies",
   "raw_confidence": 0.8954265,
-  "fallback_score": 0.8954265,
   "calibrated_probability": 0.9668866,
   "threshold": 0.3449275,
   "decision": "answer",
   "artifact": "qwen2.5-7b__movies",
   "reason": null,
-  "warnings": [],
-  "question_entity": "The Intouchables",
-  "answer_entity": "Olivier Nakache",
-  "feature_values": {
-    "confidence": 0.8954265,
-    "qpop": 60.0,
-    "gene_pop": 15.0,
-    "gene_coo": 9.0
-  },
-  "feature_coverage": {
-    "qpop": true,
-    "gene_pop": true,
-    "gene_coo": true
-  },
-  "noisy_entity": false
+  "warnings": []
 }
 ```
 
----
+概率取决于输入、流行度特征和 artifact，示例值不是固定期望值。
 
-## 8. M4 决策处理规则
+## 6. 降级策略
 
-推荐使用以下保守策略：
+输入不符合 Schema 时，MCP 返回工具错误，例如：
 
-```python
-if result["status"] == "ok":
-    if result["decision"] == "answer":
-        return_original_answer()
-    elif result["decision"] == "retrieve":
-        perform_retrieval()
+- `question` 或 `model` 为空；
+- `confidence` 不是数字或不在 `[0,1]`；
+- `domain` 不在支持列表中。
 
-else:
-    # degraded 状态不能被当作正常校准成功
-    perform_retrieval_or_fallback()
-```
+运行时资源缺失时，服务返回结构化降级结果，不让 Agent 崩溃：
 
-建议决策表：
-
-| status | decision | M4 行为 |
+| 场景 | `reason` | 处理方式 |
 |---|---|---|
-| `ok` | `answer` | 直接采用原始答案 |
-| `ok` | `retrieve` | 执行联网搜索或本地 RAG |
-| `degraded` | `unknown` | 优先检索 |
-| `degraded` | `answer/retrieve` | 表示部分特征缺失；默认仍建议检索 |
-| MCP 调用失败 | 无 | 不阻塞 Agent，进入检索或原始答案兜底 |
+| 无法推断领域 | `domain_not_inferred` | 返回 `unknown` |
+| 答案为空 | `empty_answer` | 返回 `unknown` |
+| 实体噪声过高 | `noisy_entity` | 返回 `unknown` |
+| 三个流行度特征全部缺失 | `no_popularity_features` | 返回 `unknown` |
+| 部分流行度特征缺失 | `partial_feature_coverage` | 缺失值补 0，返回概率和决策，同时标记 `degraded` |
+| 找不到权重 | `artifact_not_found` | 返回原始分数和 `unknown` |
+| artifact 损坏 | `artifact_invalid` | 返回原始分数和 `unknown` |
 
-不要只检查 `decision` 而忽略 `status`。
+`fallback_score` 是原始置信度，不是校准概率，不能与 MLP 阈值直接比较。上游收到 `unknown` 后应进入检索、拒答或其他兜底流程。
 
-### 检索不可用时
+## 7. 已知限制
 
-如果检索服务不可用：
+1. **实体链接较朴素。** 当前主要依赖问题模板和字符串清洗，别名、缩写、重音字符、同名实体、多实体答案或解释性回答可能无法命中。
+2. **仅支持三个领域。** 当前只支持电影导演、歌曲表演者和篮球球员出生地问题。
+3. **离线表覆盖有限。** 流行度表来自论文快照，不会自动更新；新问题或新答案可能没有特征。
+4. **训练与部署协议必须一致。** 模型版本、prompt、chat template、解码参数或 tokenizer 变化后，应重新验证或重新训练校准器。
+5. **Basketball 上的 Qwen2.5 结果仅供实验。** 论文未将该组合纳入主要后续分析。
+6. **MCP 仅支持 stdio。** 当前没有 HTTP、认证、TLS 或多租户能力。
+7. **vLLM 随 Slurm 作业结束。** 作业超时、抢占或节点故障后，端点会消失。
 
-1. 保留原始答案；
-2. 记录 fallback 原因；
-3. 不要将 `fallback_score` 描述成校准概率；
-4. 不要让 Agent 因校准服务异常而崩溃。
+## 8. 测试与验收
 
----
-
-## 9. MCP 子进程配置
-
-MCP SDK v2 的 stdio 子进程只继承有限环境变量，因此必须显式提供项目路径。
-
-示例：
-
-```python
-from mcp import Client, StdioServerParameters
-
-server = StdioServerParameters(
-    command="/absolute/path/30-LLM-Project/.venv-m3/bin/python",
-    args=["-m", "mcp_server.server"],
-    env={
-        "PYTHONPATH": "/absolute/path/30-LLM-Project",
-        "POPULAR_BUT_WRONG_REPO": (
-            "/absolute/path/30-LLM-Project/"
-            "reference/Popular-but-Wrong"
-        ),
-    },
-)
-```
-
-M4 接入 OpenHands 时，应使用集群上的真实绝对路径。
-
----
-
-## 10. Slurm 部署注意事项
-
-vLLM 默认绑定：
-
-```text
-127.0.0.1:8000
-```
-
-这意味着 OpenHands/M4 客户端必须与 vLLM 运行在同一个计算节点。
-
-推荐方式：
-
-```text
-同一个 Slurm 作业
-├── vLLM 后台进程
-├── OpenHands Agent
-└── MCP stdio 子进程
-```
-
-不要默认从另一个计算节点访问 `127.0.0.1:8000`。
-
-如果将 vLLM 改为 `0.0.0.0`，必须同时考虑：
-
-- 集群网络策略；
-- 端口冲突；
-- 身份验证；
-- 未授权访问；
-- 学校安全规定。
-
-当前项目默认不开放远程端口。
-
----
-
-## 11. 一键端到端验收
-
-设置缓存：
-
-```bash
-export M3_HF_HOME="<project-or-scratch>/zhiao001/huggingface"
-```
-
-提交：
-
-```bash
-sbatch \
-  --export=ALL,M3_HF_HOME="$M3_HF_HOME" \
-  model_runtime/vllm/m3_e2e.slurm
-```
-
-查看作业：
-
-```bash
-squeue -j <JOB_ID>
-```
-
-查看输出：
-
-```bash
-tail -f m3-e2e-<JOB_ID>.out
-```
-
-查看模型日志：
-
-```bash
-tail -f logs/vllm-<JOB_ID>.log
-```
-
-验收成功时，输出末尾包含：
-
-```text
-M3 end-to-end smoke test passed
-M3 Slurm acceptance passed
-```
-
-最终检查：
-
-```bash
-sacct \
-  -j <JOB_ID> \
-  --format=JobID,JobName,State,ExitCode,Elapsed,MaxRSS
-```
-
-期望：
-
-```text
-State     COMPLETED
-ExitCode  0:0
-```
-
----
-
-## 12. 本地测试命令
-
-MCP 与业务逻辑测试不需要 GPU：
+### CPU 测试
 
 ```bash
 source .venv-m3/bin/activate
 pytest -q mcp_server/tests
 ```
 
-vLLM 基础测试需要在 GPU 节点运行：
-
-```bash
-source .venv-vllm/bin/activate
-python model_runtime/vllm/smoke_test.py
-```
-
-真实闭环测试：
+### 已启动 vLLM 时的闭环测试
 
 ```bash
 source .venv-m3/bin/activate
 python -m mcp_server.e2e_smoke_test
 ```
 
----
+### Slurm 一键验收
 
-## 13. 当前支持范围与限制
+```bash
+export M3_PROJECT_ROOT="/absolute/path/to/30-LLM-Project"
+export M3_HF_HOME="/absolute/project-or-scratch/path/huggingface"
 
-当前离线 popularity 表主要覆盖论文的三类问题：
+sbatch \
+  --export=ALL,M3_PROJECT_ROOT="$M3_PROJECT_ROOT",M3_HF_HOME="$M3_HF_HOME" \
+  mcp_server/m3_e2e.slurm
+```
 
-| domain | 问题类型 |
-|---|---|
-| `movies` | 电影 → 导演 |
-| `songs` | 歌曲 → 表演者 |
-| `basketball` | 篮球运动员 → 出生地 |
+检查作业状态：
 
-限制：
+```bash
+sacct -j <JOB_ID> --format=JobID,JobName,State,ExitCode,Elapsed,MaxRSS
+```
 
-1. 任意开放领域问题可能无法命中 popularity 表。
-2. 在线答案与论文归档答案写法差异过大时，可能缺少 `PopGe` 或 `RPopGe`。
-3. 缺失单个特征时，服务按论文协议补 0，并返回 `degraded`。
-4. 所有 popularity 特征都缺失时，decision 为 `unknown`。
-5. Qwen2.5 系列在 Basketball 数据上的原始准确率很低，该组合应视为实验性支持。
-6. 不允许使用其他模型的校准权重代替当前模型权重。
+通过标准：
 
----
+- 日志包含 `M3 end-to-end smoke test passed`；
+- 日志包含 `M3 Slurm acceptance passed`；
+- 作业状态为 `COMPLETED`；
+- 退出码为 `0:0`。
+
+M3 的最终验收项：
+
+1. vLLM 返回答案和逐 token logprobs；
+2. 原始置信度计算符合论文定义；
+3. MCP 发布 `calibrate` 工具及 Schema；
+4. 在线 NumPy 推理与 P2 离线推理误差小于 `1e-6`；
+5. 正常输入返回校准概率和 `answer/retrieve`；
+6. 缺特征、缺权重和实体噪声场景返回结构化降级；
+7. Slurm 验收作业以 `COMPLETED`、`0:0` 结束。
 
