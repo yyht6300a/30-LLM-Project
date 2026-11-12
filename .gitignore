@@ -1,11 +1,15 @@
 # Reference paper repository (cloned separately, keep upstream git history)
 reference/
 
+# OpenHands SDK clone (upstream source, kept out of the project repo)
+agent_integration/openhands/
+
 # Python
 __pycache__/
 *.py[cod]
 .venv/
 venv/
+.venv-*/
 *.egg-info/
 .pytest_cache/
 
@@ -20,3 +24,4 @@ models/
 
 # Generated outputs
 *.log
+smoke_report*.json
