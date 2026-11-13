@@ -200,9 +200,9 @@ def stage4_vllm_mcp() -> str:
 def stage5_registration() -> str:
     from openhands.sdk import Agent, Conversation, LLM
     from openhands.sdk.tool import Tool
+    from openhands.sdk.tool.registry import list_registered_tools
 
-    import calibrated_qa  # noqa: F401  (import triggers register_tool)
-    import search_tool  # noqa: F401  (import triggers register_tool)
+    import calibrated_qa  # noqa: F401  (registers calibrated_qa and, transitively, search_qa)
 
     llm = LLM(
         usage_id="smoke",
@@ -221,17 +221,19 @@ def stage5_registration() -> str:
                     "mcp_python": MCP_PYTHON,
                     "project_root": str(PROJECT_ROOT),
                     "paper_repo": PAPER_REPO,
+                    "data_dir": DATA_DIR,
                 },
             ),
-            Tool(name="search_qa", params={"data_dir": DATA_DIR}),
         ],
         system_prompt=SMOKE_PROMPT,
     )
     conversation = Conversation(agent=agent, workspace=str(PROJECT_ROOT))
     agent._initialize(conversation.state)  # force tool resolution for the check
     names = sorted(agent._tools.keys())
-    assert "calibrated_qa" in names and "search_qa" in names, names
-    return f"registered runtime tools={names}"
+    assert "calibrated_qa" in names, names
+    registered = list_registered_tools()
+    assert "search_qa" in registered, registered  # registered but not exposed to agent
+    return f"agent tools={names}; registered={sorted(registered)}"
 
 
 def stage6_e2e() -> str:
@@ -239,7 +241,6 @@ def stage6_e2e() -> str:
     from openhands.sdk.tool import Tool
 
     import calibrated_qa  # noqa: F401
-    import search_tool  # noqa: F401
 
     llm = LLM(
         usage_id="e2e",
@@ -258,9 +259,9 @@ def stage6_e2e() -> str:
                     "mcp_python": MCP_PYTHON,
                     "project_root": str(PROJECT_ROOT),
                     "paper_repo": PAPER_REPO,
+                    "data_dir": DATA_DIR,
                 },
             ),
-            Tool(name="search_qa", params={"data_dir": DATA_DIR}),
         ],
         system_prompt=SMOKE_PROMPT,
     )

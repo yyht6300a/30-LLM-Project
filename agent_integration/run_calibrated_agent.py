@@ -28,7 +28,6 @@ from openhands.sdk import Agent, Conversation, LLM  # noqa: E402
 from openhands.sdk.tool import Tool  # noqa: E402
 
 import calibrated_qa  # noqa: E402,F401  (import triggers register_tool)
-import search_tool  # noqa: E402,F401  (import triggers register_tool)
 
 
 VLLM_BASE_URL = os.getenv("M3_VLLM_BASE_URL", "http://127.0.0.1:8000/v1")
@@ -45,14 +44,10 @@ RAW_THRESHOLD = float(os.getenv("M3_RAW_THRESHOLD", "0.5"))
 AGENT_INSTRUCTIONS = (
     "You answer closed-book entity-centric factual questions about movies "
     "(director), songs (performer), and basketball players (birthplace).\n\n"
-    "For every such factual question, follow this workflow:\n"
-    "1. Call the calibrated_qa tool with the question.\n"
-    "2. If its decision is \"answer\", reply with the answer it returned, "
-    "without changing the wording.\n"
-    "3. If its decision is \"retrieve\" or \"unknown\", do not treat the "
-    "answer as final. Call the search_qa tool with the same question, then "
-    "answer using the returned reference answer(s), and mention that the "
-    "answer was verified by retrieval.\n\n"
+    "For every such factual question, call the calibrated_qa tool with the "
+    "question, then reply with exactly the final answer it returns, without "
+    "changing the wording. calibrated_qa already performs retrieval when its "
+    "confidence is low, so do not call any other search tool.\n\n"
     "For anything that is not one of these three factual question types, "
     "work normally and do not call calibrated_qa."
 )
@@ -67,7 +62,7 @@ def main() -> None:
         api_key=SecretStr("local-dev"),
     )
 
-    # 2) Register the two tools by name via the SDK tool registry.
+    # 2) Register the calibrated QA tool via the SDK tool registry.
     agent = Agent(
         llm=llm,
         tools=[
@@ -81,11 +76,8 @@ def main() -> None:
                     "paper_repo": PAPER_REPO,
                     "mode": DECISION_MODE,
                     "raw_threshold": RAW_THRESHOLD,
+                    "data_dir": str(Path(PAPER_REPO) / "data"),
                 },
-            ),
-            Tool(
-                name="search_qa",
-                params={"data_dir": str(Path(PAPER_REPO) / "data")},
             ),
         ],
         system_prompt=AGENT_INSTRUCTIONS,
