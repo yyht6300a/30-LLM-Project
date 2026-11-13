@@ -56,7 +56,13 @@ def infer_dataset(question: str) -> str | None:
 
 
 def question_entity(question: str, dataset: str) -> str:
-    """Question entity with original casing; a bare entity passes through unchanged."""
+    """Question entity tail after removing the template prefix.
+
+    Casing and punctuation are preserved here: titles such as ``Moulin Rouge!``
+    or ``Shall We Dance?`` must keep their trailing punctuation. The runtime
+    ``?`` that an agent appends to the question is resolved separately in
+    ``PopularityLookup.lookup``.
+    """
     return question.replace(QUESTION_PREFIXES[dataset], "")
 
 
@@ -106,10 +112,10 @@ class PopularityLookup:
 
     def __init__(self, repo_dir: str | os.PathLike | None = None):
         root = resolve_repo_dir(repo_dir)
-        # PopQ is attached per question in the QA files; key by the exact question
-        # entity (Movies "Coma"/"COMA" and Songs "Change"/"chAngE" differ only by case).
+        # PopQ is attached per question in the QA files; key by the authoritative
+        # question_entity field (preserves legit trailing punctuation, and case).
         self.question_pop = {
-            dataset: {question_entity(row["question"], dataset): _sitelinks(row["popularity"])
+            dataset: {row["question_entity"]: _sitelinks(row["popularity"])
                       for row in _read_jsonl(root / path)}
             for dataset, path in QA_FILES.items()
         }
@@ -133,9 +139,19 @@ class PopularityLookup:
 
         q_entity = question_entity(question, dataset) if dataset else question
         gene_entity = clean_entity(response, dataset) if dataset else ""
+
+        qpop = None
+        if dataset:
+            # Runtime questions often append "?"; the authoritative entity may
+            # itself end with "?"/"!". Try raw first, then question-mark-stripped.
+            for candidate in (q_entity, q_entity.rstrip("?？")):
+                if candidate in self.question_pop[dataset]:
+                    q_entity = candidate
+                    qpop = self.question_pop[dataset][candidate]
+                    break
+
         q_key, gene_key = q_entity.lower(), gene_entity.lower()
 
-        qpop = self.question_pop[dataset].get(q_entity) if dataset else None
         gene_pop = self.entity_pop.get(gene_entity) if gene_entity else None
         gene_coo = self.cooccurrence.get(q_key, {}).get(gene_key) if dataset and gene_entity else None
         q_occ = self.occurrence.get(q_key) if dataset else None

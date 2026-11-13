@@ -31,13 +31,14 @@ OpenHands agent，使 agent 在事实问答场景中先取得初步答案与模�
 
 ## Agent 集成（P4）
 
-在 OpenHands agent 侧实现了两个运行时工具，通过 SDK 工具注册表（`register_tool` +
-`Tool(name, params)`）接入：
+在 OpenHands agent 侧实现了两个组件，通过 SDK 工具注册表（`register_tool` +
+`Tool(name, params)`）接入；agent 实际只暴露 `calibrated_qa` 一个工具：
 
-- `calibrated_qa`：对事实问题做 answer-only 生成，取 logprobs 算原始置信度 c，再经
-  stdio MCP 调 `calibrate` 得到校准概率与 `answer / retrieve / unknown` 决策。
-- `search_qa`：离线知识库检索，decision 为 `retrieve` 或 `unknown` 时按问题实体查
-  论文三份源数据的标准答案别名，作为检索证据兜底。
+- `calibrated_qa`：对事实问题做 answer-only 生成，取 logprobs 算原始置信度 c，经
+  stdio MCP 调 `calibrate` 得到 `answer / retrieve / unknown` 决策；当决策为
+  `retrieve` / `unknown` 时，工具内部直接做知识库检索，把检索到的标准答案一并返回。
+- `search_qa`：离线知识库检索组件（`KnowledgeBase`），被 `calibrated_qa` 在低置信
+  时内部复用；同时以独立工具形式注册备用，但不暴露给 agent。
 
 实现见 [agent_integration/calibrated_qa.py](agent_integration/calibrated_qa.py)、
 [agent_integration/search_tool.py](agent_integration/search_tool.py)、
@@ -50,8 +51,8 @@ OpenHands agent，使 agent 在事实问答场景中先取得初步答案与模�
 可行性预检 → SDK 导入 → 数据索引 → 决策策略 → vLLM+MCP → 工具注册 → 完整 e2e。
 
 最终结果（`Qwen/Qwen2.5-7B-Instruct-AWQ` 4-bit 量化模型）：
-0–6 全部 PASS；e2e 中 agent 经 `calibrated_qa` 判 `retrieve` 后调用 `search_qa`
-检索，最终正确回答。完整过程与逐条修复记录见
+0–6 全部 PASS；e2e 中 agent 经 `calibrated_qa` 判 `retrieve` 后由其内部检索并
+正确回答。完整过程与逐条修复记录见
 [agent_integration/smoke_run_log.md](agent_integration/smoke_run_log.md)。
 
 ## 本地运行（量化模型）

@@ -29,6 +29,8 @@
 5. vLLM flashinfer 缺 nvcc → 禁用 flashinfer 采样，回退 PyTorch 采样。
 6. 显存受限 → 降低 `max_model_len`、调 `gpu_memory_utilization`、启用 eager 模式。
 7. tool calling → vLLM 开启 `--enable-auto-tool-choice --tool-call-parser hermes`。
+8. agent 在 decision=retrieve 时漏调 `search_qa` → 把知识库检索折叠进 `calibrated_qa`
+   （低置信时工具内部检索并返回标准答案），agent 只需原样引用，不再依赖 LLM 自行调用。
 
 ## 最终结果
 
@@ -39,8 +41,8 @@
 | 2_data | PASS（26,428 条） |
 | 3_decision | PASS |
 | 4_vllm_mcp | PASS（生成答案 → 算 c → 校准 → decision） |
-| 5_registration | PASS（`calibrated_qa` / `finish` / `search_qa`） |
-| 6_e2e | PASS（会话 FINISHED，agent 判 retrieve 后经 search_qa 检索并正确回答） |
+| 5_registration | PASS（agent 工具 `calibrated_qa` / `finish`；`search_qa` 注册但未暴露） |
+| 6_e2e | PASS（会话 FINISHED，agent 判 retrieve 后由 calibrated_qa 内部检索并正确回答） |
 
 ## 结论
 

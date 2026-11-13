@@ -7,6 +7,7 @@ ablation study can toggle each one without touching the others:
     Layer 1  answer generation       (vLLM, owns token logprobs)
     Layer 2  calibration client      (stdio MCP ``calibrate`` tool)
     Layer 3  decision policy         (pure function, ablation-toggleable)
+    Layer 4  knowledge-base retrieval (in-tool fallback on retrieve/unknown)
 
 Every result carries a ``trace`` with request id, model, domain, artifact,
 feature values/coverage, decision source and timing so each decision can be
@@ -37,6 +38,7 @@ from openhands.sdk.tool.tool import (
     ToolExecutor,
 )
 from openhands.sdk.tool.registry import register_tool
+from search_tool import KnowledgeBase
 
 if TYPE_CHECKING:
     from openhands.sdk.conversation.impl.local_conversation import LocalConversation
@@ -55,10 +57,9 @@ _DESCRIPTION = (
     "Answer a factual question and return a calibrated confidence for the "
     "answer. Use this tool for entity-centric questions such as the director "
     "of a movie, the performer of a song, or the birthplace of a basketball "
-    "player. It returns the answer, the raw confidence, the calibrated "
-    "probability, and a decision (answer / retrieve / unknown). When the "
-    "decision is retrieve or unknown, do not present the answer as final; "
-    "search for confirmation instead."
+    "player. The tool already performs retrieval when its confidence is low, "
+    "so reply with exactly the answer or retrieved reference it returns; do "
+    "not call any other search tool."
 )
 
 
@@ -259,6 +260,9 @@ class CalibratedQAObservation(Observation):
     domain: str | None = None
     feature_values: dict | None = None
     feature_coverage: dict | None = None
+    retrieved_references: list[str] = Field(default_factory=list)
+    retrieved_matched_question: str | None = None
+    retrieval_triggered: bool = False
     latency_ms: int | None = None
 
 
@@ -281,17 +285,22 @@ class CalibratedQAExecutor(
         paper_repo: str | Path | None = None,
         mode: str = "calibrated",
         raw_threshold: float = 0.5,
+        data_dir: str | Path | None = None,
+        retrieval_enabled: bool = True,
     ) -> None:
         self.base_url = base_url
         self.model = model
         self.domain = domain
         self.mode = mode
         self.raw_threshold = raw_threshold
+        self.retrieval_enabled = retrieval_enabled
+        paper_repo_path = Path(paper_repo or DEFAULT_PAPER_REPO)
         self.calibration = CalibrationClient(
             mcp_python=mcp_python,
             project_root=project_root,
-            paper_repo=paper_repo,
+            paper_repo=str(paper_repo_path),
         )
+        self.kb = KnowledgeBase(data_dir or (paper_repo_path / "data"))
 
     def __call__(
         self,
@@ -346,11 +355,24 @@ class CalibratedQAExecutor(
             raw_threshold=self.raw_threshold,
         )
 
+        retrieved_references: list[str] = []
+        retrieved_matched_question: str | None = None
+        retrieval_triggered = False
+        if self.retrieval_enabled and decision in {"retrieve", "unknown"}:
+            retrieval_triggered = True
+            records = self.kb.search(action.question)
+            if records:
+                retrieved_matched_question = records[0]["question"]
+                for record in records:
+                    for reference in record["references"]:
+                        if reference not in retrieved_references:
+                            retrieved_references.append(reference)
+
         finished = _now()
         latency_ms = _latency_ms(started, finished)
         lines = [
             f"Question: {action.question}",
-            f"Answer: {generation.answer}",
+            f"Generated answer: {generation.answer}",
             f"Raw confidence: {generation.raw_confidence:.4f}",
             (
                 f"Calibrated probability: {probability:.4f}"
@@ -361,6 +383,15 @@ class CalibratedQAExecutor(
         ]
         if calibrated.get("reason"):
             lines.append(f"Reason: {calibrated.get('reason')}")
+        if decision == "answer":
+            lines.append(f"Final answer: {generation.answer}")
+        elif retrieved_references:
+            lines.append("Retrieved answer(s): " + ", ".join(retrieved_references))
+            lines.append("Final answer: " + ", ".join(retrieved_references))
+        else:
+            lines.append(
+                "Final answer: unknown — reply that you cannot answer confidently."
+            )
 
         return CalibratedQAObservation(
             content=[TextContent(text="\n".join(lines))],
@@ -379,6 +410,9 @@ class CalibratedQAExecutor(
             domain=calibrated.get("domain"),
             feature_values=calibrated.get("feature_values"),
             feature_coverage=calibrated.get("feature_coverage"),
+            retrieved_references=retrieved_references,
+            retrieved_matched_question=retrieved_matched_question,
+            retrieval_triggered=retrieval_triggered,
             latency_ms=latency_ms,
         )
 

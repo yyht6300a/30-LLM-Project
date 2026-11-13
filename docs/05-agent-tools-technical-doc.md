@@ -1,22 +1,24 @@
-# Agent 侧双工具技术文档
+# Agent 侧校准问答技术文档
 
-本文描述 P4 在 OpenHands agent 侧实现的两个运行时工具——`calibrated_qa` 与
-`search_qa`——的架构、实现原理、接口形式，汇总冒烟测试结果，并给出下一步计划
-（含消融实验方案）。
+本文描述 P4 在 OpenHands agent 侧实现的 `calibrated_qa` 工具，以及它内部复用的
+`search_qa`（`KnowledgeBase`）知识库组件的架构、实现原理、接口形式，汇总冒烟测试
+结果，并给出下一步计划（含消融实验方案）。
 
 ## 1. 总体架构
 
-两个工具都以 OpenHands SDK 的 `ToolDefinition` 体系实现，注册进 SDK 工具注册表，
-由主 agent 的 LLM 通过函数调用触发。
+两个组件都以 OpenHands SDK 的 `ToolDefinition` 体系实现并注册进工具注册表；agent
+实际只暴露 `calibrated_qa`，由主 LLM 通过函数调用触发，低置信时的知识库检索在工具
+内部完成。
 
 ```text
 用户问题
   │ conversation.send_message(question)
   ▼
 OpenHands Agent（主 LLM，LiteLLM → vLLM 的 qwen2.5-7b）
-  │  按 system prompt 决策调用哪个工具
-  ├─ calibrated_qa  事实问答：生成答案 + 算 c + 调 MCP 校准
-  └─ search_qa      低置信 / unknown 时：查本地知识库兜底
+  │  调用 calibrated_qa
+  ▼
+calibrated_qa：生成答案 + 算 c + 调 MCP 校准 + 决策
+  └─ 低置信 / unknown 时 → 内部调 KnowledgeBase 检索，返回标准答案
 ```
 
 两个工具共用的注册机制：
@@ -26,13 +28,12 @@ from openhands.sdk.tool.registry import register_tool
 from openhands.sdk.tool import Tool
 
 register_tool("calibrated_qa", CalibratedQATool)
-register_tool("search_qa", SearchTool)
+register_tool("search_qa", SearchTool)   # 注册备用，不加入 agent 工具列表
 
 agent = Agent(
     llm=llm,
     tools=[
-        Tool(name="calibrated_qa", params={...}),
-        Tool(name="search_qa", params={"data_dir": ...}),
+        Tool(name="calibrated_qa", params={"data_dir": ..., ...}),
     ],
     system_prompt=AGENT_INSTRUCTIONS,
 )
@@ -49,18 +50,19 @@ agent = Agent(
 ### 2.1 功能
 
 对实体中心事实问题（电影导演 / 歌曲演唱者 / 篮球球员出生地）生成答案，并返回校准
-后的正确概率与决策。它把"取 logprobs → 算 c → 校准"封闭在工具内部，agent 不需要
-接触 token 概率。
+后的正确概率与决策。它把"取 logprobs → 算 c → 校准 → 低置信时检索"全部封闭在工具
+内部，agent 不需要接触 token 概率，也不需要在低置信时自行调用检索工具。
 
 ### 2.2 分层实现原理
 
-执行器 `CalibratedQAExecutor` 分四层，每层可独立替换，服务于消融实验：
+执行器 `CalibratedQAExecutor` 分五层，每层可独立替换，服务于消融实验：
 
 ```text
 Layer 0  calculate_confidence    纯函数：logprobs -> c，无 I/O
 Layer 1  generate_answer         vLLM answer-only 生成，独占 logprobs
 Layer 2  CalibrationClient       stdio MCP 调 calibrate 工具
 Layer 3  DecisionPolicy          纯函数：概率/置信度 -> answer|retrieve|unknown
+Layer 4  KnowledgeBase           低置信时：本地知识库检索标准答案
 ```
 
 Layer 0：c 的计算口径与论文一致。
@@ -87,6 +89,10 @@ Layer 3：`DecisionPolicy.decide(mode, calibrated_probability, threshold,
 raw_confidence, raw_threshold)`。`mode="calibrated"` 用校准概率对 artifact 阈值，
 `mode="raw"` 用原始 c 对 raw_threshold（无校准基线）。这是消融实验的核心开关。
 
+Layer 4：当 `decision` 为 `retrieve` 或 `unknown` 且 `retrieval_enabled=True` 时，
+直接调用 `KnowledgeBase.search(question)`，把检索到的标准答案别名放进返回结果，
+并在返回文本里给出明确的 `Final answer:`，agent 只需原样引用。
+
 ### 2.3 接口形式
 
 输入 Action：
@@ -112,6 +118,9 @@ CalibratedQAAction
 | reason / warnings | str / list | 降级原因与提示 |
 | request_id / model / domain | — | 可定位性：请求号、模型、领域 |
 | feature_values / feature_coverage | dict | 特征值与命中情况 |
+| retrieved_references | list[str] | 低置信时检索到的标准答案别名 |
+| retrieved_matched_question | str \| None | 命中的规范问题 |
+| retrieval_triggered | bool | 本次是否触发了内部检索 |
 | latency_ms | int \| None | 耗时 |
 
 下游 MCP `calibrate` 工具的输入为 `question, answer, confidence, model, domain(可选)`，
@@ -129,17 +138,19 @@ agent 调 calibrated_qa(question)
   → CalibrationClient.calibrate：spawn mcp_server.server，调 calibrate
        → 实体链接 → 查流行度表 → 组装 [c, PopQ, PopGe, RPopGe] → MLP → P(正确)
   → DecisionPolicy：按 mode 产生 decision
+  → （decision ∈ {retrieve, unknown} 时）KnowledgeBase.search → retrieved_references
   → CalibratedQAObservation（含 content 文本 + 结构化字段）回流 agent
 ```
 
-## 3. search_qa 工具
+## 3. search_qa / KnowledgeBase 组件
 
 文件：[agent_integration/search_tool.py](../agent_integration/search_tool.py)
 
 ### 3.1 功能
 
-离线知识库检索：当校准结果 decision 为 `retrieve` 或 `unknown` 时，从论文三份源数据
-中查出标准答案别名，作为"检索证据"回给 agent。
+离线知识库检索：从论文三份源数据中查出标准答案别名。`KnowledgeBase` 是
+`calibrated_qa` 在低置信时内部复用的数据层；`SearchTool` 则作为独立工具注册备用，
+不加入 agent 的工具列表。
 
 ### 3.2 实现原理
 
@@ -189,8 +200,8 @@ SearchAction
 ## 4. 主 agent 编排
 
 主 agent 的 system prompt（`run_calibrated_agent.py` 中的 `AGENT_INSTRUCTIONS`）规定
-事实问题走 `calibrated_qa`；`decision=answer` 直接回答，`retrieve`/`unknown` 转
-`search_qa` 检索后重答并标注来源；非事实任务不调 `calibrated_qa`。
+事实问题调 `calibrated_qa`，然后原样引用其返回的 final answer；检索已由工具内部完成，
+agent 不调用其它搜索工具。非事实任务不调 `calibrated_qa`。
 
 主 agent 的 LLM 模型名使用 LiteLLM 限定形式 `openai/qwen2.5-7b`（`M3_AGENT_LLM_MODEL`），
 而 vLLM served 名与校准 artifact 的 slug 保持 `qwen2.5-7b`，二者不可混淆。
@@ -215,7 +226,7 @@ SearchAction
 | 2_data | PASS（26,428 条） |
 | 3_decision | PASS |
 | 4_vllm_mcp | PASS（c=0.7406 → p=0.8123，decision=answer，artifact=qwen2.5-7b__movies） |
-| 5_registration | PASS（`calibrated_qa` / `finish` / `search_qa`） |
+| 5_registration | PASS（agent 工具 `calibrated_qa` / `finish`；`search_qa` 注册但未暴露） |
 | 6_e2e | PASS（conversation FINISHED，最终回答 Olivier Nakache 与 Éric Toledano） |
 
 关键执行参数与修复记录见
@@ -231,7 +242,7 @@ SearchAction
 | 消融变量 | 取值 | 实现方式 |
 |---|---|---|
 | 决策源 | calibrated vs raw | `M3_DECISION_MODE=calibrated` / `raw`，`decision_source` 字段区分 |
-| 检索兜底 | 开 vs 关 | 开=保留 `search_qa`；关=从工具列表移除，decision=retrieve 时只拒答 |
+| 检索兜底 | 开 vs 关 | `retrieval_enabled=True/False`；关时 retrieve/unknown 直接返回 unknown |
 | 特征子集 | full vs c-only vs c+RPopGe | 需要 P2 额外导出 c-only 与 c+RPopGe 的部署 artifact（当前仅导出 full） |
 | 模型精度 | bf16 vs AWQ 4bit | 分别部署 bf16 与 AWQ 4bit，对比 c 与校准概率分布 |
 

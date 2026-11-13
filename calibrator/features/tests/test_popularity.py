@@ -39,7 +39,7 @@ def toy(tmp_path_factory):
     (root / "data").mkdir()
     (root / "res").mkdir()
     qa = {
-        "movies": [("Coma", 20), ("COMA", 16), ("Alien", 50)],
+        "movies": [("Coma", 20), ("COMA", 16), ("Alien", 50), ("Moulin Rouge!", 60)],
         "songs": [("Hello", 30)],
         "basketball": [("Yao Ming", 80)],
     }
@@ -91,6 +91,19 @@ def test_lookup_found_values(toy):
     assert (b["qpop"], b["gene_pop"], b["gene_coo"]) == (80, 120, 9)
     assert not b["noisy_entity"]                               # basketball ignores gene_occ
     assert toy.lookup("Hello", "Adele", dataset="Songs")["noisy_entity"]   # q_occ > 6000
+
+
+def test_lookup_trailing_punctuation(toy):
+    # Agent-appended '?' must be resolved, but a title's own trailing '!'/'?'
+    # must be preserved (e.g. "Moulin Rouge!").
+    q = toy.lookup(MOVIE_Q + "Alien?", "Ridley Scott")
+    assert q["question_entity"] == "Alien" and q["qpop_found"] and q["qpop"] == 50
+
+    m = toy.lookup(MOVIE_Q + "Moulin Rouge!", "Baz Luhrmann")
+    assert m["question_entity"] == "Moulin Rouge!" and m["qpop_found"] and m["qpop"] == 60
+
+    m2 = toy.lookup(MOVIE_Q + "Moulin Rouge!?", "Baz Luhrmann")
+    assert m2["question_entity"] == "Moulin Rouge!" and m2["qpop_found"] and m2["qpop"] == 60
 
 
 def test_missing_values_differ_from_genuine_zeros(toy):
