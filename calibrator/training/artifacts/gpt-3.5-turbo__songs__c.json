@@ -1,0 +1,40 @@
+{
+  "model": "gpt-3.5-turbo",
+  "dataset": "songs",
+  "variant": "c",
+  "features": [
+    "confidence"
+  ],
+  "protocol": "balanced",
+  "mlp": {
+    "hidden": [
+      128,
+      64,
+      32
+    ],
+    "lr": 0.0005,
+    "weight_decay": 0.0001,
+    "dropout": 0.3,
+    "seed": 42
+  },
+  "scaler_mean": [
+    0.9420402449838347
+  ],
+  "scaler_scale": [
+    0.10138711157019861
+  ],
+  "threshold": 0.4803132712841034,
+  "n_trainval": 768,
+  "n_test": 768,
+  "files": {
+    "pt": "gpt-3.5-turbo__songs__c.pt",
+    "npz": "gpt-3.5-turbo__songs__c.npz"
+  },
+  "test_metrics": {
+    "alignment": 0.7604166666666666,
+    "auroc": 0.8059332461140704,
+    "ece": 0.03556251242783523,
+    "brier": 0.16238110650906012,
+    "conf_wrong": 0.488580152151985
+  }
+}

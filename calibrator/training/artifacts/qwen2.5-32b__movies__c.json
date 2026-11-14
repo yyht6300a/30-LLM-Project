@@ -1,0 +1,40 @@
+{
+  "model": "qwen2.5-32b",
+  "dataset": "movies",
+  "variant": "c",
+  "features": [
+    "confidence"
+  ],
+  "protocol": "balanced",
+  "mlp": {
+    "hidden": [
+      128,
+      64,
+      32
+    ],
+    "lr": 0.0005,
+    "weight_decay": 0.0001,
+    "dropout": 0.3,
+    "seed": 42
+  },
+  "scaler_mean": [
+    0.8592552872030023
+  ],
+  "scaler_scale": [
+    0.13980082069250466
+  ],
+  "threshold": 0.5418935418128967,
+  "n_trainval": 4782,
+  "n_test": 4783,
+  "files": {
+    "pt": "qwen2.5-32b__movies__c.pt",
+    "npz": "qwen2.5-32b__movies__c.npz"
+  },
+  "test_metrics": {
+    "alignment": 0.846748902362534,
+    "auroc": 0.9158928562260201,
+    "ece": 0.031491473421854384,
+    "brier": 0.11288894433023877,
+    "conf_wrong": 0.2064596452305108
+  }
+}

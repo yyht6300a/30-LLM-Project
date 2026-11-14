@@ -1,6 +1,7 @@
 {
   "model": "llama3-8b",
   "dataset": "movies",
+  "variant": "full",
   "features": [
     "confidence",
     "qpop",

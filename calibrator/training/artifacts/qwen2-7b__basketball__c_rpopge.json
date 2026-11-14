@@ -1,0 +1,43 @@
+{
+  "model": "qwen2-7b",
+  "dataset": "basketball",
+  "variant": "c_rpopge",
+  "features": [
+    "confidence",
+    "gene_coo"
+  ],
+  "protocol": "balanced",
+  "mlp": {
+    "hidden": [
+      128,
+      64,
+      32
+    ],
+    "lr": 0.0005,
+    "weight_decay": 0.0001,
+    "dropout": 0.3,
+    "seed": 42
+  },
+  "scaler_mean": [
+    0.7996669269459726,
+    7.7731800766283525
+  ],
+  "scaler_scale": [
+    0.1495347725478751,
+    21.77391425523659
+  ],
+  "threshold": 0.5009694695472717,
+  "n_trainval": 1305,
+  "n_test": 1305,
+  "files": {
+    "pt": "qwen2-7b__basketball__c_rpopge.pt",
+    "npz": "qwen2-7b__basketball__c_rpopge.npz"
+  },
+  "test_metrics": {
+    "alignment": 0.696551724137931,
+    "auroc": 0.7641489491633705,
+    "ece": 0.04514915508671281,
+    "brier": 0.19799500360590522,
+    "conf_wrong": 0.40456123468658645
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "model": "gpt-3.5-turbo",
+  "dataset": "basketball",
+  "variant": "c",
+  "features": [
+    "confidence"
+  ],
+  "protocol": "balanced",
+  "mlp": {
+    "hidden": [
+      128,
+      64,
+      32
+    ],
+    "lr": 0.0005,
+    "weight_decay": 0.0001,
+    "dropout": 0.3,
+    "seed": 42
+  },
+  "scaler_mean": [
+    0.790574089884376
+  ],
+  "scaler_scale": [
+    0.2186651459782374
+  ],
+  "threshold": 0.6760607957839966,
+  "n_trainval": 6650,
+  "n_test": 6650,
+  "files": {
+    "pt": "gpt-3.5-turbo__basketball__c.pt",
+    "npz": "gpt-3.5-turbo__basketball__c.npz"
+  },
+  "test_metrics": {
+    "alignment": 0.7768421052631579,
+    "auroc": 0.8241833360830099,
+    "ece": 0.05323934639026796,
+    "brier": 0.16194834310435477,
+    "conf_wrong": 0.2555197388360068
+  }
+}

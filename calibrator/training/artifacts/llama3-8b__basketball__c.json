@@ -1,0 +1,40 @@
+{
+  "model": "llama3-8b",
+  "dataset": "basketball",
+  "variant": "c",
+  "features": [
+    "confidence"
+  ],
+  "protocol": "balanced",
+  "mlp": {
+    "hidden": [
+      128,
+      64,
+      32
+    ],
+    "lr": 0.0005,
+    "weight_decay": 0.0001,
+    "dropout": 0.3,
+    "seed": 42
+  },
+  "scaler_mean": [
+    0.6508912253303364
+  ],
+  "scaler_scale": [
+    0.23003970568397292
+  ],
+  "threshold": 0.5174446105957031,
+  "n_trainval": 1771,
+  "n_test": 1771,
+  "files": {
+    "pt": "llama3-8b__basketball__c.pt",
+    "npz": "llama3-8b__basketball__c.npz"
+  },
+  "test_metrics": {
+    "alignment": 0.6634669678147939,
+    "auroc": 0.7260945530601574,
+    "ece": 0.046769114435223906,
+    "brier": 0.2125190227313141,
+    "conf_wrong": 0.4476003998356533
+  }
+}
