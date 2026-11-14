@@ -1,6 +1,7 @@
 {
   "model": "gpt-3.5-turbo",
   "dataset": "songs",
+  "variant": "full",
   "features": [
     "confidence",
     "qpop",

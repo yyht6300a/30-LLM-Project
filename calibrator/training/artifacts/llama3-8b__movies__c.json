@@ -1,0 +1,40 @@
+{
+  "model": "llama3-8b",
+  "dataset": "movies",
+  "variant": "c",
+  "features": [
+    "confidence"
+  ],
+  "protocol": "balanced",
+  "mlp": {
+    "hidden": [
+      128,
+      64,
+      32
+    ],
+    "lr": 0.0005,
+    "weight_decay": 0.0001,
+    "dropout": 0.3,
+    "seed": 42
+  },
+  "scaler_mean": [
+    0.8884321648198554
+  ],
+  "scaler_scale": [
+    0.1437963955938674
+  ],
+  "threshold": 0.4823567271232605,
+  "n_trainval": 4764,
+  "n_test": 4765,
+  "files": {
+    "pt": "llama3-8b__movies__c.pt",
+    "npz": "llama3-8b__movies__c.npz"
+  },
+  "test_metrics": {
+    "alignment": 0.832109129066107,
+    "auroc": 0.8983948307024276,
+    "ece": 0.02542729694715088,
+    "brier": 0.11748152126644865,
+    "conf_wrong": 0.36445784206632637
+  }
+}

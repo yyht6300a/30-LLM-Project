@@ -1,6 +1,7 @@
 {
   "model": "llama3-8b",
   "dataset": "songs",
+  "variant": "full",
   "features": [
     "confidence",
     "qpop",

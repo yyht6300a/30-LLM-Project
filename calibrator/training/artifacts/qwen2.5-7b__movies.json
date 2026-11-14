@@ -1,6 +1,7 @@
 {
   "model": "qwen2.5-7b",
   "dataset": "movies",
+  "variant": "full",
   "features": [
     "confidence",
     "qpop",

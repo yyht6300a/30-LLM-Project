@@ -1,0 +1,43 @@
+{
+  "model": "llama3-8b",
+  "dataset": "movies",
+  "variant": "c_rpopge",
+  "features": [
+    "confidence",
+    "gene_coo"
+  ],
+  "protocol": "balanced",
+  "mlp": {
+    "hidden": [
+      128,
+      64,
+      32
+    ],
+    "lr": 0.0005,
+    "weight_decay": 0.0001,
+    "dropout": 0.3,
+    "seed": 42
+  },
+  "scaler_mean": [
+    0.8884321648198565,
+    13.260705289672543
+  ],
+  "scaler_scale": [
+    0.14379639559386748,
+    23.001652753517792
+  ],
+  "threshold": 0.3160501718521118,
+  "n_trainval": 4764,
+  "n_test": 4765,
+  "files": {
+    "pt": "llama3-8b__movies__c_rpopge.pt",
+    "npz": "llama3-8b__movies__c_rpopge.npz"
+  },
+  "test_metrics": {
+    "alignment": 0.9028331584470094,
+    "auroc": 0.945210427742728,
+    "ece": 0.02616118058302817,
+    "brier": 0.07257608939182458,
+    "conf_wrong": 0.2245628707369405
+  }
+}

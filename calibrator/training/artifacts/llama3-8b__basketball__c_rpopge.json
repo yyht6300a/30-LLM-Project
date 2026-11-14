@@ -1,0 +1,43 @@
+{
+  "model": "llama3-8b",
+  "dataset": "basketball",
+  "variant": "c_rpopge",
+  "features": [
+    "confidence",
+    "gene_coo"
+  ],
+  "protocol": "balanced",
+  "mlp": {
+    "hidden": [
+      128,
+      64,
+      32
+    ],
+    "lr": 0.0005,
+    "weight_decay": 0.0001,
+    "dropout": 0.3,
+    "seed": 42
+  },
+  "scaler_mean": [
+    0.6508912253303367,
+    7.626764539808018
+  ],
+  "scaler_scale": [
+    0.23003970568397306,
+    20.841423420361604
+  ],
+  "threshold": 0.4865364134311676,
+  "n_trainval": 1771,
+  "n_test": 1771,
+  "files": {
+    "pt": "llama3-8b__basketball__c_rpopge.pt",
+    "npz": "llama3-8b__basketball__c_rpopge.npz"
+  },
+  "test_metrics": {
+    "alignment": 0.7131564088085828,
+    "auroc": 0.7847483133743991,
+    "ece": 0.042555550943149265,
+    "brier": 0.1896740405975171,
+    "conf_wrong": 0.4025931854566252
+  }
+}

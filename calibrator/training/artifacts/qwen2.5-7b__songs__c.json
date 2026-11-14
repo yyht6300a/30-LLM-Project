@@ -1,0 +1,40 @@
+{
+  "model": "qwen2.5-7b",
+  "dataset": "songs",
+  "variant": "c",
+  "features": [
+    "confidence"
+  ],
+  "protocol": "balanced",
+  "mlp": {
+    "hidden": [
+      128,
+      64,
+      32
+    ],
+    "lr": 0.0005,
+    "weight_decay": 0.0001,
+    "dropout": 0.3,
+    "seed": 42
+  },
+  "scaler_mean": [
+    0.8484042657818532
+  ],
+  "scaler_scale": [
+    0.1314435854557492
+  ],
+  "threshold": 0.44149303436279297,
+  "n_trainval": 148,
+  "n_test": 148,
+  "files": {
+    "pt": "qwen2.5-7b__songs__c.pt",
+    "npz": "qwen2.5-7b__songs__c.npz"
+  },
+  "test_metrics": {
+    "alignment": 0.8513513513513513,
+    "auroc": 0.9287801314828341,
+    "ece": 0.11321095694359895,
+    "brier": 0.11281389875183157,
+    "conf_wrong": 0.2228373660630471
+  }
+}

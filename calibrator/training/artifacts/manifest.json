@@ -1,128 +1,668 @@
 {
-  "llama3-8b/movies": {
+  "llama3-8b/movies/full": {
+    "stem": "llama3-8b__movies",
+    "features": [
+      "confidence",
+      "qpop",
+      "gene_pop",
+      "gene_coo"
+    ],
     "json": "llama3-8b__movies.json",
     "pt": "llama3-8b__movies.pt",
     "npz": "llama3-8b__movies.npz",
     "threshold": 0.4069000482559204,
     "alignment": 0.9242392444910807
   },
-  "llama3-8b/songs": {
+  "llama3-8b/movies/c": {
+    "stem": "llama3-8b__movies__c",
+    "features": [
+      "confidence"
+    ],
+    "json": "llama3-8b__movies__c.json",
+    "pt": "llama3-8b__movies__c.pt",
+    "npz": "llama3-8b__movies__c.npz",
+    "threshold": 0.4823567271232605,
+    "alignment": 0.832109129066107
+  },
+  "llama3-8b/movies/c_rpopge": {
+    "stem": "llama3-8b__movies__c_rpopge",
+    "features": [
+      "confidence",
+      "gene_coo"
+    ],
+    "json": "llama3-8b__movies__c_rpopge.json",
+    "pt": "llama3-8b__movies__c_rpopge.pt",
+    "npz": "llama3-8b__movies__c_rpopge.npz",
+    "threshold": 0.3160501718521118,
+    "alignment": 0.9028331584470094
+  },
+  "llama3-8b/songs/full": {
+    "stem": "llama3-8b__songs",
+    "features": [
+      "confidence",
+      "qpop",
+      "gene_pop",
+      "gene_coo"
+    ],
     "json": "llama3-8b__songs.json",
     "pt": "llama3-8b__songs.pt",
     "npz": "llama3-8b__songs.npz",
     "threshold": 0.4723570644855499,
     "alignment": 0.8504672897196262
   },
-  "llama3-8b/basketball": {
+  "llama3-8b/songs/c": {
+    "stem": "llama3-8b__songs__c",
+    "features": [
+      "confidence"
+    ],
+    "json": "llama3-8b__songs__c.json",
+    "pt": "llama3-8b__songs__c.pt",
+    "npz": "llama3-8b__songs__c.npz",
+    "threshold": 0.5600070953369141,
+    "alignment": 0.778816199376947
+  },
+  "llama3-8b/songs/c_rpopge": {
+    "stem": "llama3-8b__songs__c_rpopge",
+    "features": [
+      "confidence",
+      "gene_coo"
+    ],
+    "json": "llama3-8b__songs__c_rpopge.json",
+    "pt": "llama3-8b__songs__c_rpopge.pt",
+    "npz": "llama3-8b__songs__c_rpopge.npz",
+    "threshold": 0.4487188160419464,
+    "alignment": 0.8317757009345794
+  },
+  "llama3-8b/basketball/full": {
+    "stem": "llama3-8b__basketball",
+    "features": [
+      "confidence",
+      "qpop",
+      "gene_pop",
+      "gene_coo"
+    ],
     "json": "llama3-8b__basketball.json",
     "pt": "llama3-8b__basketball.pt",
     "npz": "llama3-8b__basketball.npz",
     "threshold": 0.5096796751022339,
     "alignment": 0.6984754376058724
   },
-  "qwen2-7b/movies": {
+  "llama3-8b/basketball/c": {
+    "stem": "llama3-8b__basketball__c",
+    "features": [
+      "confidence"
+    ],
+    "json": "llama3-8b__basketball__c.json",
+    "pt": "llama3-8b__basketball__c.pt",
+    "npz": "llama3-8b__basketball__c.npz",
+    "threshold": 0.5174446105957031,
+    "alignment": 0.6634669678147939
+  },
+  "llama3-8b/basketball/c_rpopge": {
+    "stem": "llama3-8b__basketball__c_rpopge",
+    "features": [
+      "confidence",
+      "gene_coo"
+    ],
+    "json": "llama3-8b__basketball__c_rpopge.json",
+    "pt": "llama3-8b__basketball__c_rpopge.pt",
+    "npz": "llama3-8b__basketball__c_rpopge.npz",
+    "threshold": 0.4865364134311676,
+    "alignment": 0.7131564088085828
+  },
+  "qwen2-7b/movies/full": {
+    "stem": "qwen2-7b__movies",
+    "features": [
+      "confidence",
+      "qpop",
+      "gene_pop",
+      "gene_coo"
+    ],
     "json": "qwen2-7b__movies.json",
     "pt": "qwen2-7b__movies.pt",
     "npz": "qwen2-7b__movies.npz",
     "threshold": 0.49867838621139526,
     "alignment": 0.918388645376748
   },
-  "qwen2-7b/songs": {
+  "qwen2-7b/movies/c": {
+    "stem": "qwen2-7b__movies__c",
+    "features": [
+      "confidence"
+    ],
+    "json": "qwen2-7b__movies__c.json",
+    "pt": "qwen2-7b__movies__c.pt",
+    "npz": "qwen2-7b__movies__c.npz",
+    "threshold": 0.5195143818855286,
+    "alignment": 0.8111041536213734
+  },
+  "qwen2-7b/movies/c_rpopge": {
+    "stem": "qwen2-7b__movies__c_rpopge",
+    "features": [
+      "confidence",
+      "gene_coo"
+    ],
+    "json": "qwen2-7b__movies__c_rpopge.json",
+    "pt": "qwen2-7b__movies__c_rpopge.pt",
+    "npz": "qwen2-7b__movies__c_rpopge.npz",
+    "threshold": 0.517737865447998,
+    "alignment": 0.8814443748695471
+  },
+  "qwen2-7b/songs/full": {
+    "stem": "qwen2-7b__songs",
+    "features": [
+      "confidence",
+      "qpop",
+      "gene_pop",
+      "gene_coo"
+    ],
     "json": "qwen2-7b__songs.json",
     "pt": "qwen2-7b__songs.pt",
     "npz": "qwen2-7b__songs.npz",
     "threshold": 0.31823647022247314,
     "alignment": 0.8981481481481481
   },
-  "qwen2-7b/basketball": {
+  "qwen2-7b/songs/c": {
+    "stem": "qwen2-7b__songs__c",
+    "features": [
+      "confidence"
+    ],
+    "json": "qwen2-7b__songs__c.json",
+    "pt": "qwen2-7b__songs__c.pt",
+    "npz": "qwen2-7b__songs__c.npz",
+    "threshold": 0.5040253400802612,
+    "alignment": 0.7870370370370371
+  },
+  "qwen2-7b/songs/c_rpopge": {
+    "stem": "qwen2-7b__songs__c_rpopge",
+    "features": [
+      "confidence",
+      "gene_coo"
+    ],
+    "json": "qwen2-7b__songs__c_rpopge.json",
+    "pt": "qwen2-7b__songs__c_rpopge.pt",
+    "npz": "qwen2-7b__songs__c_rpopge.npz",
+    "threshold": 0.47894155979156494,
+    "alignment": 0.9012345679012346
+  },
+  "qwen2-7b/basketball/full": {
+    "stem": "qwen2-7b__basketball",
+    "features": [
+      "confidence",
+      "qpop",
+      "gene_pop",
+      "gene_coo"
+    ],
     "json": "qwen2-7b__basketball.json",
     "pt": "qwen2-7b__basketball.pt",
     "npz": "qwen2-7b__basketball.npz",
     "threshold": 0.4618090093135834,
     "alignment": 0.6942528735632184
   },
-  "gpt-3.5-turbo/movies": {
+  "qwen2-7b/basketball/c": {
+    "stem": "qwen2-7b__basketball__c",
+    "features": [
+      "confidence"
+    ],
+    "json": "qwen2-7b__basketball__c.json",
+    "pt": "qwen2-7b__basketball__c.pt",
+    "npz": "qwen2-7b__basketball__c.npz",
+    "threshold": 0.5161949992179871,
+    "alignment": 0.6827586206896552
+  },
+  "qwen2-7b/basketball/c_rpopge": {
+    "stem": "qwen2-7b__basketball__c_rpopge",
+    "features": [
+      "confidence",
+      "gene_coo"
+    ],
+    "json": "qwen2-7b__basketball__c_rpopge.json",
+    "pt": "qwen2-7b__basketball__c_rpopge.pt",
+    "npz": "qwen2-7b__basketball__c_rpopge.npz",
+    "threshold": 0.5009694695472717,
+    "alignment": 0.696551724137931
+  },
+  "gpt-3.5-turbo/movies/full": {
+    "stem": "gpt-3.5-turbo__movies",
+    "features": [
+      "confidence",
+      "qpop",
+      "gene_pop",
+      "gene_coo"
+    ],
     "json": "gpt-3.5-turbo__movies.json",
     "pt": "gpt-3.5-turbo__movies.pt",
     "npz": "gpt-3.5-turbo__movies.npz",
     "threshold": 0.4312099814414978,
     "alignment": 0.8152173913043478
   },
-  "gpt-3.5-turbo/songs": {
+  "gpt-3.5-turbo/movies/c": {
+    "stem": "gpt-3.5-turbo__movies__c",
+    "features": [
+      "confidence"
+    ],
+    "json": "gpt-3.5-turbo__movies__c.json",
+    "pt": "gpt-3.5-turbo__movies__c.pt",
+    "npz": "gpt-3.5-turbo__movies__c.npz",
+    "threshold": 0.6916977763175964,
+    "alignment": 0.7862318840579711
+  },
+  "gpt-3.5-turbo/movies/c_rpopge": {
+    "stem": "gpt-3.5-turbo__movies__c_rpopge",
+    "features": [
+      "confidence",
+      "gene_coo"
+    ],
+    "json": "gpt-3.5-turbo__movies__c_rpopge.json",
+    "pt": "gpt-3.5-turbo__movies__c_rpopge.pt",
+    "npz": "gpt-3.5-turbo__movies__c_rpopge.npz",
+    "threshold": 0.5501923561096191,
+    "alignment": 0.7910628019323671
+  },
+  "gpt-3.5-turbo/songs/full": {
+    "stem": "gpt-3.5-turbo__songs",
+    "features": [
+      "confidence",
+      "qpop",
+      "gene_pop",
+      "gene_coo"
+    ],
     "json": "gpt-3.5-turbo__songs.json",
     "pt": "gpt-3.5-turbo__songs.pt",
     "npz": "gpt-3.5-turbo__songs.npz",
     "threshold": 0.5313950777053833,
     "alignment": 0.78515625
   },
-  "gpt-3.5-turbo/basketball": {
+  "gpt-3.5-turbo/songs/c": {
+    "stem": "gpt-3.5-turbo__songs__c",
+    "features": [
+      "confidence"
+    ],
+    "json": "gpt-3.5-turbo__songs__c.json",
+    "pt": "gpt-3.5-turbo__songs__c.pt",
+    "npz": "gpt-3.5-turbo__songs__c.npz",
+    "threshold": 0.4803132712841034,
+    "alignment": 0.7604166666666666
+  },
+  "gpt-3.5-turbo/songs/c_rpopge": {
+    "stem": "gpt-3.5-turbo__songs__c_rpopge",
+    "features": [
+      "confidence",
+      "gene_coo"
+    ],
+    "json": "gpt-3.5-turbo__songs__c_rpopge.json",
+    "pt": "gpt-3.5-turbo__songs__c_rpopge.pt",
+    "npz": "gpt-3.5-turbo__songs__c_rpopge.npz",
+    "threshold": 0.47028443217277527,
+    "alignment": 0.7916666666666666
+  },
+  "gpt-3.5-turbo/basketball/full": {
+    "stem": "gpt-3.5-turbo__basketball",
+    "features": [
+      "confidence",
+      "qpop",
+      "gene_pop",
+      "gene_coo"
+    ],
     "json": "gpt-3.5-turbo__basketball.json",
     "pt": "gpt-3.5-turbo__basketball.pt",
     "npz": "gpt-3.5-turbo__basketball.npz",
     "threshold": 0.5226559638977051,
     "alignment": 0.7843609022556391
   },
-  "qwen2.5-7b/movies": {
+  "gpt-3.5-turbo/basketball/c": {
+    "stem": "gpt-3.5-turbo__basketball__c",
+    "features": [
+      "confidence"
+    ],
+    "json": "gpt-3.5-turbo__basketball__c.json",
+    "pt": "gpt-3.5-turbo__basketball__c.pt",
+    "npz": "gpt-3.5-turbo__basketball__c.npz",
+    "threshold": 0.6760607957839966,
+    "alignment": 0.7768421052631579
+  },
+  "gpt-3.5-turbo/basketball/c_rpopge": {
+    "stem": "gpt-3.5-turbo__basketball__c_rpopge",
+    "features": [
+      "confidence",
+      "gene_coo"
+    ],
+    "json": "gpt-3.5-turbo__basketball__c_rpopge.json",
+    "pt": "gpt-3.5-turbo__basketball__c_rpopge.pt",
+    "npz": "gpt-3.5-turbo__basketball__c_rpopge.npz",
+    "threshold": 0.579045832157135,
+    "alignment": 0.7810526315789473
+  },
+  "qwen2.5-7b/movies/full": {
+    "stem": "qwen2.5-7b__movies",
+    "features": [
+      "confidence",
+      "qpop",
+      "gene_pop",
+      "gene_coo"
+    ],
     "json": "qwen2.5-7b__movies.json",
     "pt": "qwen2.5-7b__movies.pt",
     "npz": "qwen2.5-7b__movies.npz",
     "threshold": 0.34492748975753784,
     "alignment": 0.9485420240137221
   },
-  "qwen2.5-7b/songs": {
+  "qwen2.5-7b/movies/c": {
+    "stem": "qwen2.5-7b__movies__c",
+    "features": [
+      "confidence"
+    ],
+    "json": "qwen2.5-7b__movies__c.json",
+    "pt": "qwen2.5-7b__movies__c.pt",
+    "npz": "qwen2.5-7b__movies__c.npz",
+    "threshold": 0.5028613805770874,
+    "alignment": 0.8198970840480274
+  },
+  "qwen2.5-7b/movies/c_rpopge": {
+    "stem": "qwen2.5-7b__movies__c_rpopge",
+    "features": [
+      "confidence",
+      "gene_coo"
+    ],
+    "json": "qwen2.5-7b__movies__c_rpopge.json",
+    "pt": "qwen2.5-7b__movies__c_rpopge.pt",
+    "npz": "qwen2.5-7b__movies__c_rpopge.npz",
+    "threshold": 0.49102556705474854,
+    "alignment": 0.934819897084048
+  },
+  "qwen2.5-7b/songs/full": {
+    "stem": "qwen2.5-7b__songs",
+    "features": [
+      "confidence",
+      "qpop",
+      "gene_pop",
+      "gene_coo"
+    ],
     "json": "qwen2.5-7b__songs.json",
     "pt": "qwen2.5-7b__songs.pt",
     "npz": "qwen2.5-7b__songs.npz",
     "threshold": 0.6841999888420105,
     "alignment": 0.9256756756756757
   },
-  "qwen2.5-7b/basketball": {
+  "qwen2.5-7b/songs/c": {
+    "stem": "qwen2.5-7b__songs__c",
+    "features": [
+      "confidence"
+    ],
+    "json": "qwen2.5-7b__songs__c.json",
+    "pt": "qwen2.5-7b__songs__c.pt",
+    "npz": "qwen2.5-7b__songs__c.npz",
+    "threshold": 0.44149303436279297,
+    "alignment": 0.8513513513513513
+  },
+  "qwen2.5-7b/songs/c_rpopge": {
+    "stem": "qwen2.5-7b__songs__c_rpopge",
+    "features": [
+      "confidence",
+      "gene_coo"
+    ],
+    "json": "qwen2.5-7b__songs__c_rpopge.json",
+    "pt": "qwen2.5-7b__songs__c_rpopge.pt",
+    "npz": "qwen2.5-7b__songs__c_rpopge.npz",
+    "threshold": 0.741062343120575,
+    "alignment": 0.9054054054054054
+  },
+  "qwen2.5-7b/basketball/full": {
+    "stem": "qwen2.5-7b__basketball",
+    "features": [
+      "confidence",
+      "qpop",
+      "gene_pop",
+      "gene_coo"
+    ],
     "json": "qwen2.5-7b__basketball.json",
     "pt": "qwen2.5-7b__basketball.pt",
     "npz": "qwen2.5-7b__basketball.npz",
     "threshold": 0.4203168451786041,
     "alignment": 0.7140319715808171
   },
-  "qwen2.5-14b/movies": {
+  "qwen2.5-7b/basketball/c": {
+    "stem": "qwen2.5-7b__basketball__c",
+    "features": [
+      "confidence"
+    ],
+    "json": "qwen2.5-7b__basketball__c.json",
+    "pt": "qwen2.5-7b__basketball__c.pt",
+    "npz": "qwen2.5-7b__basketball__c.npz",
+    "threshold": 0.5507639050483704,
+    "alignment": 0.6287744227353463
+  },
+  "qwen2.5-7b/basketball/c_rpopge": {
+    "stem": "qwen2.5-7b__basketball__c_rpopge",
+    "features": [
+      "confidence",
+      "gene_coo"
+    ],
+    "json": "qwen2.5-7b__basketball__c_rpopge.json",
+    "pt": "qwen2.5-7b__basketball__c_rpopge.pt",
+    "npz": "qwen2.5-7b__basketball__c_rpopge.npz",
+    "threshold": 0.6115814447402954,
+    "alignment": 0.6305506216696269
+  },
+  "qwen2.5-14b/movies/full": {
+    "stem": "qwen2.5-14b__movies",
+    "features": [
+      "confidence",
+      "qpop",
+      "gene_pop",
+      "gene_coo"
+    ],
     "json": "qwen2.5-14b__movies.json",
     "pt": "qwen2.5-14b__movies.pt",
     "npz": "qwen2.5-14b__movies.npz",
     "threshold": 0.5136018991470337,
     "alignment": 0.9336681314082445
   },
-  "qwen2.5-14b/songs": {
+  "qwen2.5-14b/movies/c": {
+    "stem": "qwen2.5-14b__movies__c",
+    "features": [
+      "confidence"
+    ],
+    "json": "qwen2.5-14b__movies__c.json",
+    "pt": "qwen2.5-14b__movies__c.pt",
+    "npz": "qwen2.5-14b__movies__c.npz",
+    "threshold": 0.4948827922344208,
+    "alignment": 0.8166980539861896
+  },
+  "qwen2.5-14b/movies/c_rpopge": {
+    "stem": "qwen2.5-14b__movies__c_rpopge",
+    "features": [
+      "confidence",
+      "gene_coo"
+    ],
+    "json": "qwen2.5-14b__movies__c_rpopge.json",
+    "pt": "qwen2.5-14b__movies__c_rpopge.pt",
+    "npz": "qwen2.5-14b__movies__c_rpopge.npz",
+    "threshold": 0.4552169144153595,
+    "alignment": 0.9242519355513705
+  },
+  "qwen2.5-14b/songs/full": {
+    "stem": "qwen2.5-14b__songs",
+    "features": [
+      "confidence",
+      "qpop",
+      "gene_pop",
+      "gene_coo"
+    ],
     "json": "qwen2.5-14b__songs.json",
     "pt": "qwen2.5-14b__songs.pt",
     "npz": "qwen2.5-14b__songs.npz",
     "threshold": 0.5601572394371033,
     "alignment": 0.920265780730897
   },
-  "qwen2.5-14b/basketball": {
+  "qwen2.5-14b/songs/c": {
+    "stem": "qwen2.5-14b__songs__c",
+    "features": [
+      "confidence"
+    ],
+    "json": "qwen2.5-14b__songs__c.json",
+    "pt": "qwen2.5-14b__songs__c.pt",
+    "npz": "qwen2.5-14b__songs__c.npz",
+    "threshold": 0.5077471137046814,
+    "alignment": 0.8471760797342193
+  },
+  "qwen2.5-14b/songs/c_rpopge": {
+    "stem": "qwen2.5-14b__songs__c_rpopge",
+    "features": [
+      "confidence",
+      "gene_coo"
+    ],
+    "json": "qwen2.5-14b__songs__c_rpopge.json",
+    "pt": "qwen2.5-14b__songs__c_rpopge.pt",
+    "npz": "qwen2.5-14b__songs__c_rpopge.npz",
+    "threshold": 0.36371707916259766,
+    "alignment": 0.9401993355481728
+  },
+  "qwen2.5-14b/basketball/full": {
+    "stem": "qwen2.5-14b__basketball",
+    "features": [
+      "confidence",
+      "qpop",
+      "gene_pop",
+      "gene_coo"
+    ],
     "json": "qwen2.5-14b__basketball.json",
     "pt": "qwen2.5-14b__basketball.pt",
     "npz": "qwen2.5-14b__basketball.npz",
     "threshold": 0.38651812076568604,
     "alignment": 0.6755373592630501
   },
-  "qwen2.5-32b/movies": {
+  "qwen2.5-14b/basketball/c": {
+    "stem": "qwen2.5-14b__basketball__c",
+    "features": [
+      "confidence"
+    ],
+    "json": "qwen2.5-14b__basketball__c.json",
+    "pt": "qwen2.5-14b__basketball__c.pt",
+    "npz": "qwen2.5-14b__basketball__c.npz",
+    "threshold": 0.4672536253929138,
+    "alignment": 0.6693961105424769
+  },
+  "qwen2.5-14b/basketball/c_rpopge": {
+    "stem": "qwen2.5-14b__basketball__c_rpopge",
+    "features": [
+      "confidence",
+      "gene_coo"
+    ],
+    "json": "qwen2.5-14b__basketball__c_rpopge.json",
+    "pt": "qwen2.5-14b__basketball__c_rpopge.pt",
+    "npz": "qwen2.5-14b__basketball__c_rpopge.npz",
+    "threshold": 0.494236558675766,
+    "alignment": 0.6704196519959058
+  },
+  "qwen2.5-32b/movies/full": {
+    "stem": "qwen2.5-32b__movies",
+    "features": [
+      "confidence",
+      "qpop",
+      "gene_pop",
+      "gene_coo"
+    ],
     "json": "qwen2.5-32b__movies.json",
     "pt": "qwen2.5-32b__movies.pt",
     "npz": "qwen2.5-32b__movies.npz",
     "threshold": 0.44809821248054504,
     "alignment": 0.9366506376750993
   },
-  "qwen2.5-32b/songs": {
+  "qwen2.5-32b/movies/c": {
+    "stem": "qwen2.5-32b__movies__c",
+    "features": [
+      "confidence"
+    ],
+    "json": "qwen2.5-32b__movies__c.json",
+    "pt": "qwen2.5-32b__movies__c.pt",
+    "npz": "qwen2.5-32b__movies__c.npz",
+    "threshold": 0.5418935418128967,
+    "alignment": 0.846748902362534
+  },
+  "qwen2.5-32b/movies/c_rpopge": {
+    "stem": "qwen2.5-32b__movies__c_rpopge",
+    "features": [
+      "confidence",
+      "gene_coo"
+    ],
+    "json": "qwen2.5-32b__movies__c_rpopge.json",
+    "pt": "qwen2.5-32b__movies__c_rpopge.pt",
+    "npz": "qwen2.5-32b__movies__c_rpopge.npz",
+    "threshold": 0.4695804715156555,
+    "alignment": 0.9245243570980556
+  },
+  "qwen2.5-32b/songs/full": {
+    "stem": "qwen2.5-32b__songs",
+    "features": [
+      "confidence",
+      "qpop",
+      "gene_pop",
+      "gene_coo"
+    ],
     "json": "qwen2.5-32b__songs.json",
     "pt": "qwen2.5-32b__songs.pt",
     "npz": "qwen2.5-32b__songs.npz",
     "threshold": 0.4385187327861786,
     "alignment": 0.9049586776859504
   },
-  "qwen2.5-32b/basketball": {
+  "qwen2.5-32b/songs/c": {
+    "stem": "qwen2.5-32b__songs__c",
+    "features": [
+      "confidence"
+    ],
+    "json": "qwen2.5-32b__songs__c.json",
+    "pt": "qwen2.5-32b__songs__c.pt",
+    "npz": "qwen2.5-32b__songs__c.npz",
+    "threshold": 0.5081452131271362,
+    "alignment": 0.8181818181818182
+  },
+  "qwen2.5-32b/songs/c_rpopge": {
+    "stem": "qwen2.5-32b__songs__c_rpopge",
+    "features": [
+      "confidence",
+      "gene_coo"
+    ],
+    "json": "qwen2.5-32b__songs__c_rpopge.json",
+    "pt": "qwen2.5-32b__songs__c_rpopge.pt",
+    "npz": "qwen2.5-32b__songs__c_rpopge.npz",
+    "threshold": 0.5206238031387329,
+    "alignment": 0.9173553719008265
+  },
+  "qwen2.5-32b/basketball/full": {
+    "stem": "qwen2.5-32b__basketball",
+    "features": [
+      "confidence",
+      "qpop",
+      "gene_pop",
+      "gene_coo"
+    ],
     "json": "qwen2.5-32b__basketball.json",
     "pt": "qwen2.5-32b__basketball.pt",
     "npz": "qwen2.5-32b__basketball.npz",
     "threshold": 0.4627338647842407,
     "alignment": 0.7366892545982575
+  },
+  "qwen2.5-32b/basketball/c": {
+    "stem": "qwen2.5-32b__basketball__c",
+    "features": [
+      "confidence"
+    ],
+    "json": "qwen2.5-32b__basketball__c.json",
+    "pt": "qwen2.5-32b__basketball__c.pt",
+    "npz": "qwen2.5-32b__basketball__c.npz",
+    "threshold": 0.5103173851966858,
+    "alignment": 0.6979670861568248
+  },
+  "qwen2.5-32b/basketball/c_rpopge": {
+    "stem": "qwen2.5-32b__basketball__c_rpopge",
+    "features": [
+      "confidence",
+      "gene_coo"
+    ],
+    "json": "qwen2.5-32b__basketball__c_rpopge.json",
+    "pt": "qwen2.5-32b__basketball__c_rpopge.pt",
+    "npz": "qwen2.5-32b__basketball__c_rpopge.npz",
+    "threshold": 0.5124584436416626,
+    "alignment": 0.7318489835430784
   }
 }

@@ -1,6 +1,7 @@
 {
   "model": "qwen2-7b",
   "dataset": "songs",
+  "variant": "full",
   "features": [
     "confidence",
     "qpop",
