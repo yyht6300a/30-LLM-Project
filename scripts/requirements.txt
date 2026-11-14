@@ -1,0 +1,15 @@
+# CPU environment (.venv-eval): tests, P1/P2 reproduction, end-to-end evaluation client, demo agent.
+# The vLLM server environment (.venv1) is model_runtime/vllm/requirements.txt.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.15.0+cpu
+numpy==2.5.4
+scipy==1.18.1
+pandas==3.1.1
+scikit-learn==1.9.1
+matplotlib==3.11.2
+regex==2026.11.9
+openai==2.54.0
+anyio==4.16.0
+mcp==2.3.0
+openhands-sdk==1.62.0
+pytest==9.2.0
