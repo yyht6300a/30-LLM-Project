@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" width="1200" height="700" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#555"/>
+    </marker>
+    <style>
+      .box { stroke-width: 1.5; rx: 8; }
+      .agent { fill: #e8f0fe; stroke: #4a6fa5; }
+      .model { fill: #fff1e0; stroke: #c27c2c; }
+      .calib { fill: #e6f4ea; stroke: #3c8a55; }
+      .store { fill: #f3f3f3; stroke: #777; }
+      .out { fill: #ffffff; stroke: #4a6fa5; }
+      .title { font-size: 15px; font-weight: 600; fill: #222; text-anchor: middle; }
+      .sub { font-size: 12.5px; fill: #444; text-anchor: middle; }
+      .mono { font-size: 12px; fill: #444; text-anchor: middle; font-family: Consolas, Menlo, monospace; }
+      .label { font-size: 12px; fill: #555; font-style: italic; }
+      .edge { stroke: #555; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="1200" height="700" fill="#ffffff"/>
+
+  <!-- online path -->
+  <rect class="box out" x="40" y="40" width="200" height="56"/>
+  <text class="title" x="140" y="73">User question</text>
+
+  <rect class="box agent" x="40" y="150" width="200" height="80"/>
+  <text class="title" x="140" y="183">OpenHands Agent</text>
+  <text class="mono" x="140" y="205">run_calibrated_agent.py</text>
+
+  <rect class="box agent" x="330" y="150" width="240" height="80"/>
+  <text class="title" x="450" y="178">calibrated_qa tool</text>
+  <text class="sub" x="450" y="198">answer-only generation</text>
+  <text class="sub" x="450" y="216">c = mean token probability</text>
+
+  <rect class="box model" x="660" y="30" width="260" height="90"/>
+  <text class="title" x="790" y="58">vLLM server</text>
+  <text class="sub" x="790" y="78">Qwen2.5-7B-Instruct, bf16</text>
+  <text class="sub" x="790" y="98">answer + token logprobs</text>
+
+  <rect class="box calib" x="660" y="170" width="260" height="90"/>
+  <text class="title" x="790" y="198">MCP calibrate tool</text>
+  <text class="mono" x="790" y="218">mcp_server/server.py</text>
+  <text class="sub" x="790" y="238">features → MLP → P(correct)</text>
+
+  <rect class="box store" x="980" y="110" width="200" height="64"/>
+  <text class="title" x="1080" y="136">Popularity lookup</text>
+  <text class="sub" x="1080" y="156">PopQ, PopGe, RPopGe</text>
+
+  <rect class="box store" x="980" y="250" width="170" height="64"/>
+  <text class="title" x="1065" y="276">Calibrator weights</text>
+  <text class="sub" x="1065" y="296">MLP per (model, domain)</text>
+
+  <rect class="box out" x="40" y="420" width="200" height="56"/>
+  <text class="title" x="140" y="443">Reply with the</text>
+  <text class="title" x="140" y="462">tool's final answer</text>
+
+  <rect class="box store" x="330" y="420" width="240" height="56"/>
+  <text class="title" x="450" y="443">Knowledge-base lookup</text>
+  <text class="mono" x="450" y="462">KnowledgeBase: data/*.jsonl</text>
+
+  <!-- online edges -->
+  <path class="edge" d="M140,96 L140,148"/>
+  <path class="edge" d="M240,178 L328,178"/>
+  <text class="label" x="258" y="170">question</text>
+  <path class="edge" d="M330,212 L242,212"/>
+  <text class="label" x="252" y="228">final answer</text>
+  <path class="edge" d="M540,150 L658,90" marker-start="url(#arrow)"/>
+  <text class="label" x="520" y="105">logprobs=True</text>
+  <path class="edge" d="M570,182 L658,190"/>
+  <text class="label" x="576" y="160">question, answer, c</text>
+  <path class="edge" d="M660,244 L572,222"/>
+  <text class="label" x="560" y="258">P(correct), decision</text>
+  <path class="edge" d="M920,190 L978,150"/>
+  <path class="edge" d="M920,235 L978,275"/>
+  <path class="edge" d="M140,230 L140,418"/>
+  <path class="edge" d="M420,232 L420,418"/>
+  <text class="label" x="300" y="330">retrieve / unknown</text>
+  <path class="edge" d="M480,418 L480,232"/>
+  <text class="label" x="488" y="330">reference answers</text>
+
+  <!-- offline region -->
+  <rect x="30" y="520" width="1110" height="170" rx="10" fill="#fafafa" stroke="#999" stroke-width="1.2" stroke-dasharray="6 4"/>
+  <text x="50" y="545" font-size="14" font-weight="600" fill="#555">Offline (training)</text>
+
+  <rect class="box store" x="80" y="565" width="230" height="70"/>
+  <text class="title" x="195" y="592">Paper snapshot</text>
+  <text class="mono" x="195" y="612">data/model_outputs/*.jsonl.gz</text>
+
+  <rect class="box calib" x="380" y="565" width="220" height="70"/>
+  <text class="title" x="490" y="592">Data prep &amp; splits</text>
+  <text class="mono" x="490" y="612">calibrator/data_prep</text>
+
+  <rect class="box calib" x="680" y="565" width="240" height="70"/>
+  <text class="title" x="800" y="592">MLP training &amp; evaluation</text>
+  <text class="mono" x="800" y="612">calibrator/training, eval</text>
+
+  <!-- offline edges -->
+  <path class="edge" d="M310,600 L378,600"/>
+  <path class="edge" d="M600,600 L678,600"/>
+  <path class="edge" d="M920,600 L1065,600 L1065,316"/>
+  <text class="label" x="935" y="592">export weights</text>
+  <path class="edge" d="M195,635 L195,665 L1170,665 L1170,176"/>
+  <text class="label" x="560" y="659">res/ lookup tables</text>
+</svg>

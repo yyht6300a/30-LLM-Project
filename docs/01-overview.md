@@ -19,7 +19,9 @@ Alignment。
 - 集成路线：route B（agent 生成答案并算 c，server 负责校准）。
 - 生成方式：answer-only 专用生成，保证 logprobs 与答案同属一次调用。
 - 置信度来源：vLLM 返回的逐 token logprobs，c = mean(exp(logprob_i))。
-- 流行度来源：离线预计算表（Wikidata sitelinks + Wikipedia 共现），表外实体用模型自生成兜底。
+- 流行度来源：离线预计算表（Wikidata sitelinks + Wikipedia 共现）。表外实体按论文口径填 0，
+  并在 `feature_coverage` 中标记；原计划的"模型自生成兜底"未实现（见 `calibrator/README.md`）。
 - 校准器粒度：按 (model, domain) 保存权重。
 - 模型：主选 Qwen2.5-7B-Instruct，vLLM 本地 OpenAI 兼容端点，贪心解码。
-- 纠偏动作：answer / retrieve 双阈值，阈值在留出集标定。
+- 纠偏动作：answer / retrieve 单阈值，阈值在训练半区上按 Alignment 最大化标定（论文附录 B.2），
+  随权重导出；无法校准时返回 unknown，由 agent 转检索。

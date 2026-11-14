@@ -70,16 +70,37 @@ OPENHANDS_SUPPRESS_BANNER=1 \
 python agent_integration/smoke_test.py
 ```
 
-## 下一步计划
+## 端到端评测（P5）
 
-- 消融实验：决策源 `calibrated vs raw`、检索兜底开/关、特征子集（需 P2 补导出
-  c-only / c+RPopGe 权重）、模型精度 bf16 vs AWQ 4bit。
-- 端到端评测：批量跑 `data/*.jsonl` 子集，统计准确率、拒答率、检索率与覆盖率-准确率曲线。
-- 工程收尾：评测脚本、CI 门禁、端到端 demo 与文档完善。
+Qwen2.5-7B-Instruct（bf16，vLLM）在 P2 测试集 2,460 题上，开/关校准器 × 开/关检索兜底。
+三个数据集上，开校准器都同时提高准确率、降低拒答率与检索率（检索关时的准确率）：
 
-详细消融与评测口径见 [docs/05-agent-tools-technical-doc.md](docs/05-agent-tools-technical-doc.md)。
+| 数据集 | 准确率 raw → calibrated | 拒答率 raw → calibrated |
+|---|---|---|
+| Movies（1,749） | 0.354 → 0.434 | 0.572 → 0.544 |
+| Songs（148） | 0.351 → 0.392 | 0.622 → 0.588 |
+| Basketball（563） | 0.181 → 0.242 | 0.702 → 0.661 |
 
-## 快速开始
+完整指标、覆盖率-准确率曲线与注意事项（检索开时知识库检索返回标准答案，准确率为理想检索上限）
+见 [evaluation/README.md](evaluation/README.md)。
 
-完整的分步开发计划见 [docs/03-development-guide.md](docs/03-development-guide.md)。
-数据来源与复现方法见 [docs/04-data-reproduction.md](docs/04-data-reproduction.md)。
+## 复现
+
+Linux / TC2，Python ≥ 3.12（TC2 先 `module load python312`），在仓库根目录：
+
+```bash
+bash scripts/reproduce.sh test   # 建环境、拉论文仓库并生成查找表、跑全部 CPU 测试（即 CI 门禁）
+bash scripts/reproduce.sh        # 再复现 P1 论文统计、P2 校准器评测与权重、离线覆盖率-准确率曲线
+bash scripts/reproduce.sh gpu    # TC2 登录节点：提交端到端消融作业，结果写入 evaluation/output/
+```
+
+端到端 demo：在 GPU 节点运行 `bash -l scripts/demo.sh`。各脚本说明见 [scripts/README.md](scripts/README.md)。
+
+## 文档
+
+- 分步开发计划：[docs/03-development-guide.md](docs/03-development-guide.md)
+- 系统架构与架构图：[docs/02-architecture.md](docs/02-architecture.md)
+- 数据来源与复现方法：[docs/04-data-reproduction.md](docs/04-data-reproduction.md)
+- Agent 双工具技术文档：[docs/05-agent-tools-technical-doc.md](docs/05-agent-tools-technical-doc.md)
+- 端到端评测与工程化技术文档（P5）：[docs/06-evaluation-technical-doc.md](docs/06-evaluation-technical-doc.md)
+- MCP 服务与 vLLM：[mcp_server/README.md](mcp_server/README.md)

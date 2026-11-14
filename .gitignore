@@ -10,6 +10,7 @@ __pycache__/
 .venv/
 venv/
 .venv-*/
+.venv1/
 *.egg-info/
 .pytest_cache/
 
@@ -24,4 +25,5 @@ models/
 
 # Generated outputs
 *.log
+logs/
 smoke_report*.json

@@ -2,7 +2,8 @@
 
 Usage (from the repo root, with the SDK installed or PYTHONPATH set):
 
-    python agent_integration/run_calibrated_agent.py
+    python agent_integration/run_calibrated_agent.py                # default question
+    python agent_integration/run_calibrated_agent.py "Q1" "Q2" ...  # one conversation per question
 
 Environment variables:
     M3_VLLM_BASE_URL      vLLM OpenAI-compatible base URL (default 127.0.0.1:8000/v1)
@@ -83,13 +84,14 @@ def main() -> None:
         system_prompt=AGENT_INSTRUCTIONS,
     )
 
-    conversation = Conversation(agent=agent, workspace=str(PROJECT_ROOT))
-    conversation.send_message(
-        "Who is the director of the movie The Intouchables?"
-    )
-    conversation.run()
-
-    print("conversation status:", conversation.state.execution_status)
+    # Questions from the command line (one conversation each), else the default demo question.
+    questions = sys.argv[1:] or ["Who is the director of the movie The Intouchables?"]
+    for i, question in enumerate(questions, 1):
+        print(f"\n===== question {i}/{len(questions)}: {question}", flush=True)
+        conversation = Conversation(agent=agent, workspace=str(PROJECT_ROOT))
+        conversation.send_message(question)
+        conversation.run()
+        print("conversation status:", conversation.state.execution_status)
 
 
 if __name__ == "__main__":

@@ -27,7 +27,8 @@
 2. P1 单独克隆论文仓库到 `reference/Popular-but-Wrong`：
    `git clone --depth 1 https://github.com/Trustworthy-Information-Access/Popular-but-Wrong.git reference/Popular-but-Wrong`。
 3. 建立 Python 3.10 虚拟环境，安装论文仓库的 `requirements-core.txt`。
-4. 运行 `python scripts/materialize_compact_data.py` 与 `python scripts/verify_artifacts.py --level full` 验证数据完整。
+4. 在 `reference/Popular-but-Wrong` 内运行 `python scripts/materialize_compact_data.py` 与 `python scripts/verify_artifacts.py --level full` 验证数据完整。
+   以上步骤已收进 `bash scripts/reproduce.sh test`（见 [scripts/README.md](../scripts/README.md)）。
 
 验收：`Artifact verification passed for level=full.`
 

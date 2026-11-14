@@ -1,0 +1,122 @@
+{
+  "movies": {
+    "raw/retrieval_off": {
+      "n": 1749,
+      "accuracy": 0.3539165237278445,
+      "refusal_rate": 0.5717552887364208,
+      "retrieval_rate": null
+    },
+    "calibrated/retrieval_off": {
+      "n": 1749,
+      "accuracy": 0.4339622641509434,
+      "refusal_rate": 0.5437392795883362,
+      "retrieval_rate": null
+    },
+    "raw/retrieval_on": {
+      "n": 1749,
+      "accuracy": 0.9256718124642653,
+      "refusal_rate": null,
+      "retrieval_rate": 0.5717552887364208
+    },
+    "calibrated/retrieval_on": {
+      "n": 1749,
+      "accuracy": 0.9777015437392796,
+      "refusal_rate": null,
+      "retrieval_rate": 0.5437392795883362
+    },
+    "curve/raw c": {
+      "0.2": 0.9628571428571429,
+      "0.4": 0.8414285714285714,
+      "0.6": 0.7028571428571428,
+      "0.8": 0.555,
+      "1.0": 0.44882790165809033
+    },
+    "curve/calibrated": {
+      "0.2": 0.9857142857142858,
+      "0.4": 0.9728571428571429,
+      "0.6": 0.7447619047619047,
+      "0.8": 0.5592857142857143,
+      "1.0": 0.44882790165809033
+    }
+  },
+  "songs": {
+    "raw/retrieval_off": {
+      "n": 148,
+      "accuracy": 0.35135135135135137,
+      "refusal_rate": 0.6216216216216216,
+      "retrieval_rate": null
+    },
+    "calibrated/retrieval_off": {
+      "n": 148,
+      "accuracy": 0.3918918918918919,
+      "refusal_rate": 0.5878378378378378,
+      "retrieval_rate": null
+    },
+    "raw/retrieval_on": {
+      "n": 148,
+      "accuracy": 0.972972972972973,
+      "refusal_rate": null,
+      "retrieval_rate": 0.6216216216216216
+    },
+    "calibrated/retrieval_on": {
+      "n": 148,
+      "accuracy": 0.9797297297297297,
+      "refusal_rate": null,
+      "retrieval_rate": 0.5878378378378378
+    },
+    "curve/raw c": {
+      "0.2": 0.9666666666666667,
+      "0.4": 0.8833333333333333,
+      "0.6": 0.7078651685393258,
+      "0.8": 0.5630252100840336,
+      "1.0": 0.4527027027027027
+    },
+    "curve/calibrated": {
+      "0.2": 1.0,
+      "0.4": 0.95,
+      "0.6": 0.7528089887640449,
+      "0.8": 0.5630252100840336,
+      "1.0": 0.4527027027027027
+    }
+  },
+  "basketball": {
+    "raw/retrieval_off": {
+      "n": 563,
+      "accuracy": 0.1811722912966252,
+      "refusal_rate": 0.7015985790408525,
+      "retrieval_rate": null
+    },
+    "calibrated/retrieval_off": {
+      "n": 563,
+      "accuracy": 0.24156305506216696,
+      "refusal_rate": 0.6607460035523979,
+      "retrieval_rate": null
+    },
+    "raw/retrieval_on": {
+      "n": 563,
+      "accuracy": 0.8827708703374778,
+      "refusal_rate": null,
+      "retrieval_rate": 0.7015985790408525
+    },
+    "calibrated/retrieval_on": {
+      "n": 563,
+      "accuracy": 0.9023090586145648,
+      "refusal_rate": null,
+      "retrieval_rate": 0.6607460035523979
+    },
+    "curve/raw c": {
+      "0.2": 0.6548672566371682,
+      "0.4": 0.5575221238938053,
+      "0.6": 0.4940828402366864,
+      "0.8": 0.43015521064301554,
+      "1.0": 0.3623445825932504
+    },
+    "curve/calibrated": {
+      "0.2": 0.7699115044247787,
+      "0.4": 0.6592920353982301,
+      "0.6": 0.5532544378698225,
+      "0.8": 0.44124168514412415,
+      "1.0": 0.3623445825932504
+    }
+  }
+}
